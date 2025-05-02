@@ -1,4 +1,4 @@
-## Клієнт (Electron)
+## Клієнт
 
 ```bash
 cd client
