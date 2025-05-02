@@ -1,0 +1,11 @@
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: matrix-synapse
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./data:/data
