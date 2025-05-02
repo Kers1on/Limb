@@ -33,6 +33,19 @@ docker run -it --rm `
     matrixdotorg/synapse:latest generate
 ```
 
+### Створити /matrix/.env і вписати
+
+```bash
+SYNAPSE_SERVER_NAME=localhost
+SYNAPSE_REPORT_STATS=no
+```
+
+### Створити /client/.env і вписати
+
+```bash
+VITE_BASE_URL="http://localhost:8008"
+```
+
 ### Запуск
 
 ```bash

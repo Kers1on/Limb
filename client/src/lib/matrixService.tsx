@@ -35,9 +35,14 @@ export async function login(
       userId: loginRes.user_id,
       deviceId: loginRes.device_id,
     };
-  } catch (err: any) {
-    console.error("Matrix login error:", err);
-    throw new Error(err.message || "Failed to login");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("Matrix login error:", err);
+      throw new Error(err.message || "Failed to login");
+    } else {
+      console.error("Matrix login error (non-Error):", err);
+      throw new Error("Failed to login");
+    }
   }
 }
 
@@ -81,8 +86,13 @@ export async function register(
       userId: regRes.user_id,
       deviceId: regRes.device_id,
     };
-  } catch (err: any) {
-    console.error("Matrix register error:", err);
-    throw new Error(err.message || "Failed to register");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("Matrix register error:", err);
+      throw new Error(err.message || "Failed to register");
+    } else {
+      console.error("Matrix register error (non-Error):", err);
+      throw new Error("Failed to register");
+    }
   }
 }

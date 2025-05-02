@@ -18,10 +18,10 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
     const restoreClient = async () => {
       try {
         // Change to another storage method
-        let accessToken = localStorage.getItem("accessToken");
-        let userId = localStorage.getItem("userId");
-        let baseUrl = localStorage.getItem("baseUrl");
-        let deviceId = localStorage.getItem("deviceId");
+        const accessToken = localStorage.getItem("accessToken");
+        const userId = localStorage.getItem("userId");
+        const baseUrl = localStorage.getItem("baseUrl");
+        const deviceId = localStorage.getItem("deviceId");
 
         if (accessToken && userId && baseUrl && deviceId) {
           const restoredClient = createClient({

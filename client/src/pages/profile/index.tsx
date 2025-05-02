@@ -8,6 +8,7 @@ import { getColor } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -37,10 +38,12 @@ const Profile = () => {
           }
 
           if (profileInfo.avatar_url) {
-            console.log("Avatar URL mxc:", profileInfo.avatar_url);
-            const avatarUrl = client.mxcUrlToHttp(profileInfo.avatar_url);
+            const avatarUrl = getCustomHttpForMxc(
+              client.baseUrl,
+              profileInfo.avatar_url,
+              client.getAccessToken() || ""
+            );
 
-            console.log("Avatar URL http:", avatarUrl);
             setImage(avatarUrl);
           }
         }
@@ -99,9 +102,7 @@ const Profile = () => {
       const mxcUrl = response.content_uri;
 
       await client.setAvatarUrl(mxcUrl);
-      setImage(URL.createObjectURL(file)); // Чисто для відображення в UI
-
-      console.log("Image URL:", mxcUrl);
+      setImage(URL.createObjectURL(file));
 
       toast.success("Profile image updated successfully");
     } catch (error) {
@@ -110,7 +111,21 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteImage = async () => {};
+  const handleDeleteImage = async () => {
+    try {
+      if (!client) {
+        toast.error("Matrix client is not ready yet.");
+        return;
+      }
+
+      await client.setAvatarUrl("");
+      setImage(null);
+      toast.success("Profile image deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete profile image:", error);
+      toast.error("Failed to delete profile image");
+    }
+  };
 
   return (
     <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center flex-col gap-10">
