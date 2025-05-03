@@ -15,7 +15,7 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 const AuthRoute = ({ children }: { children: ReactNode }) => {
   const { client } = useMatrix();
   const isAuthenticated = !!client;
-  return isAuthenticated ? <Navigate to="/profile" /> : children;
+  return isAuthenticated ? <Navigate to="/chat" /> : children;
 };
 
 function App() {
