@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient, MatrixClient, ClientEvent } from "matrix-js-sdk";
+import { getSession } from "./storageSession";
 
 interface MatrixContextType {
   client: MatrixClient | null;
@@ -17,11 +18,7 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const restoreClient = async () => {
       try {
-        // Change to another storage method
-        const accessToken = localStorage.getItem("accessToken");
-        const userId = localStorage.getItem("userId");
-        const baseUrl = localStorage.getItem("baseUrl");
-        const deviceId = localStorage.getItem("deviceId");
+        const { accessToken, userId, baseUrl, deviceId } = getSession();
 
         if (accessToken && userId && baseUrl && deviceId) {
           const restoredClient = createClient({

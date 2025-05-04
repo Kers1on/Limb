@@ -1,4 +1,6 @@
 import { createClient } from "matrix-js-sdk";
+import { saveSession } from "./storageSession";
+import { log } from "console";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -23,11 +25,7 @@ export async function login(
       password,
     });
 
-    // Change to another storage method
-    localStorage.setItem("accessToken", loginRes.access_token);
-    localStorage.setItem("userId", loginRes.user_id);
-    localStorage.setItem("baseUrl", baseUrl);
-    localStorage.setItem("deviceId", loginRes.device_id);
+    saveSession(loginRes.access_token, loginRes.user_id, baseUrl, loginRes.device_id);
 
     return {
       baseUrl,
@@ -74,11 +72,7 @@ export async function register(
       throw new Error("Invalid registration response from server");
     }
 
-    // Change to another storage method
-    localStorage.setItem("accessToken", regRes.access_token);
-    localStorage.setItem("userId", regRes.user_id);
-    localStorage.setItem("baseUrl", baseUrl);
-    localStorage.setItem("deviceId", regRes.device_id);
+    saveSession(regRes.access_token, regRes.user_id, baseUrl, regRes.device_id);
 
     return {
       baseUrl,
