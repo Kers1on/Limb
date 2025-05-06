@@ -17,12 +17,38 @@ import { FaPlus } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { animationDefaultOptions } from "@/lib/utils";
 import Lottie from "lottie-react";
+import { useMatrix } from "@/lib/matrixContext";
 
 function NewDM() {
+  const { client } = useMatrix();
   const [openNewContantModal, setOpenNewContantModal] = useState(false);
-  const [searchedContacts, setSearchedContacts] = useState([]);
+  const [searchedContacts, setSearchedContacts] = useState<
+    { id: string; name: string; avatarUrl: string | null }[]
+  >([]);
 
-  const searchContact = async (searchTerm: string) => {};
+  const searchContact = async (searchTerm: string) => {
+    try {
+      if (searchTerm.length > 0) {
+        const response = await client?.searchUserDirectory({
+          term: searchTerm,
+        });
+
+        if (response) {
+          const users = response.results.map((user: any) => ({
+            id: user.user_id,
+            name: user.display_name || user.user_id,
+            avatarUrl: user.avatar_url,
+          }));
+          setSearchedContacts(users);
+          //   console.log("Searched Contacts:", users);
+        } else {
+          setSearchedContacts([]);
+        }
+      }
+    } catch (error) {
+      console.error("Error searching contacts:", error);
+    }
+  };
 
   return (
     <>

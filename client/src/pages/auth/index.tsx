@@ -104,6 +104,7 @@ const Auth = () => {
           });
 
           await client.startClient();
+          await client.joinRoom("!hgmQxZqDMihGSKTHlk:localhost"); // Join a public room for indexation
           setClient(client);
           navigate("/profile");
         }
