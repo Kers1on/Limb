@@ -24,7 +24,7 @@ import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
 import { Preset } from "matrix-js-sdk";
 
 function NewDM() {
-  const { client } = useMatrix();
+  const { client, setSelectedRoomId } = useMatrix();
   const [openNewContantModal, setOpenNewContantModal] = useState(false);
   const [searchedContacts, setSearchedContacts] = useState<
     { userId: string; displayName: string; avatarUrl: string | null }[]
@@ -78,12 +78,13 @@ function NewDM() {
       return;
     }
 
-    const roomId = await client.createRoom({
+    const room = await client.createRoom({
       preset: Preset.PrivateChat,
       invite: [contact.userId],
     });
 
-    if (roomId) {
+    if (room && room.room_id) {
+      setSelectedRoomId(room.room_id);
       setOpenNewContantModal(false);
       setSearchedContacts([]);
     } else {

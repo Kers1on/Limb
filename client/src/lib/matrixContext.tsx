@@ -1,10 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { createClient, MatrixClient, ClientEvent } from "matrix-js-sdk";
-import { getSession } from "./storageSession";
+import {
+  getSession,
+  saveSelectedRoomId,
+  getSelectedRoomId,
+  clearSelectedRoomId,
+} from "./storageSession";
 
 interface MatrixContextType {
   client: MatrixClient | null;
   setClient: (client: MatrixClient | null) => void;
+  selectedRoomId: string | null;
+  setSelectedRoomId: (roomId: string | null) => void;
 }
 
 const MatrixContext = createContext<MatrixContextType | undefined>(undefined);
@@ -13,7 +20,20 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [client, setClient] = useState<MatrixClient | null>(null);
+  const [selectedRoomId, setSelectedRoomIdState] = useState<string | null>(
+    getSelectedRoomId()
+  );
+
   const [isRestoring, setIsRestoring] = useState(true);
+
+  const setSelectedRoomId = (roomId: string | null) => {
+    setSelectedRoomIdState(roomId);
+    if (roomId) {
+      saveSelectedRoomId(roomId);
+    } else {
+      clearSelectedRoomId();
+    }
+  };
 
   useEffect(() => {
     const restoreClient = async () => {
@@ -55,7 +75,9 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   return (
-    <MatrixContext.Provider value={{ client, setClient }}>
+    <MatrixContext.Provider
+      value={{ client, setClient, selectedRoomId, setSelectedRoomId }}
+    >
       {children}
     </MatrixContext.Provider>
   );

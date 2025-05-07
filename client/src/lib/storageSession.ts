@@ -21,6 +21,19 @@ export function getSession() {
     };
 };
 
+export function saveSelectedRoomId(roomId: string) {
+    localStorage.setItem("selectedRoomId", roomId);
+}
+
+export function getSelectedRoomId() {
+    const selectedRoomId = localStorage.getItem("selectedRoomId");
+    return selectedRoomId;
+}
+
+export function clearSelectedRoomId() {
+    localStorage.removeItem("selectedRoomId");
+}
+
 export function clearSession() {
     localStorage.clear();
 };
