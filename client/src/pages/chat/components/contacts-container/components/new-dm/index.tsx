@@ -21,7 +21,7 @@ import { useMatrix } from "@/lib/matrixContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
-import { Preset } from "matrix-js-sdk";
+import { Preset, AccountDataEvents } from "matrix-js-sdk";
 
 function NewDM() {
   const { client, setSelectedRoomId } = useMatrix();
@@ -78,17 +78,54 @@ function NewDM() {
       return;
     }
 
-    const room = await client.createRoom({
-      preset: Preset.PrivateChat,
-      invite: [contact.userId],
-    });
+    // 1. Отримуємо m.direct
+    const directEvent = client.getAccountData(
+      "m.direct" as keyof AccountDataEvents
+    );
+    const directMap = (directEvent?.getContent() || {}) as Record<
+      string,
+      string[]
+    >;
 
-    if (room && room.room_id) {
-      setSelectedRoomId(room.room_id);
+    const contactRoomIds = directMap[contact.userId] || [];
+
+    // 2. Перевіряємо, чи якась із кімнат ще існує в клієнта
+    for (const roomId of contactRoomIds) {
+      const room = client.getRoom(roomId);
+      if (room) {
+        setSelectedRoomId(room.roomId);
+        setOpenNewContantModal(false);
+        setSearchedContacts([]);
+        return;
+      }
+    }
+
+    // 3. Інакше створюємо нову кімнату
+    try {
+      const res = await client.createRoom({
+        invite: [contact.userId],
+        preset: Preset.PrivateChat,
+        is_direct: true,
+      });
+
+      const newRoomId = res.room_id;
+
+      // 4. Оновлюємо m.direct
+      const updatedDirectMap = {
+        ...directMap,
+        [contact.userId]: [...(directMap[contact.userId] || []), newRoomId],
+      };
+
+      await client.setAccountData(
+        "m.direct" as keyof AccountDataEvents,
+        updatedDirectMap
+      );
+
+      setSelectedRoomId(newRoomId);
       setOpenNewContantModal(false);
       setSearchedContacts([]);
-    } else {
-      console.error("Failed to create room.");
+    } catch (err) {
+      console.error("Failed to create DM room:", err);
     }
   };
 
