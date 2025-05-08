@@ -12,6 +12,7 @@ interface MatrixContextType {
   setClient: (client: MatrixClient | null) => void;
   selectedRoomId: string | null;
   setSelectedRoomId: (roomId: string | null) => void;
+  isClientReady: boolean;
 }
 
 const MatrixContext = createContext<MatrixContextType | undefined>(undefined);
@@ -21,8 +22,9 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [client, setClient] = useState<MatrixClient | null>(null);
   const [selectedRoomId, setSelectedRoomIdState] = useState<string | null>(
-    getSelectedRoomId()
+    null
   );
+  const [isClientReady, setIsClientReady] = useState(false);
 
   const [isRestoring, setIsRestoring] = useState(true);
 
@@ -51,9 +53,7 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
 
           restoredClient.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
-              console.log("Matrix client is ready!");
-            } else {
-              console.log("State is:", state);
+              setIsClientReady(true);
             }
           });
 
@@ -70,13 +70,28 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
     restoreClient();
   }, []);
 
+  useEffect(() => {
+    if (isClientReady) {
+      const storedRoomId = getSelectedRoomId();
+      if (storedRoomId) {
+        setSelectedRoomIdState(storedRoomId);
+      }
+    }
+  }, [isClientReady]);
+
   if (isRestoring) {
     return <div>Loading...</div>;
   }
 
   return (
     <MatrixContext.Provider
-      value={{ client, setClient, selectedRoomId, setSelectedRoomId }}
+      value={{
+        client,
+        setClient,
+        selectedRoomId,
+        setSelectedRoomId,
+        isClientReady,
+      }}
     >
       {children}
     </MatrixContext.Provider>

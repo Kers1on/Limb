@@ -157,47 +157,49 @@ function NewDM() {
               onChange={(e) => searchContact(e.target.value)}
             />
           </div>
-          <ScrollArea className="h-[250px]">
-            <div className="flex flex-col gap-5">
-              {searchedContacts.map((contact) => (
-                <div
-                  key={contact.userId}
-                  className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => selectNewContact(contact)}
-                >
-                  <div className="w-12 h-12 relative">
-                    <Avatar className="h-12 w-12 rounded-full overflow-hidden">
-                      {contact.avatarUrl ? (
-                        <AvatarImage
-                          src={contact.avatarUrl}
-                          alt="Profile"
-                          className="object-cover w-full h-full bg-black"
-                        />
-                      ) : (
-                        <div
-                          className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
-                        >
-                          {contact.displayName
-                            ? contact.displayName.charAt(0).toUpperCase()
-                            : contact.userId?.charAt(1).toUpperCase()}
-                        </div>
-                      )}
-                    </Avatar>
+          {searchedContacts.length > 0 && (
+            <ScrollArea className="h-[250px]">
+              <div className="flex flex-col gap-5">
+                {searchedContacts.map((contact) => (
+                  <div
+                    key={contact.userId}
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={() => selectNewContact(contact)}
+                  >
+                    <div className="w-12 h-12 relative">
+                      <Avatar className="h-12 w-12 rounded-full overflow-hidden">
+                        {contact.avatarUrl ? (
+                          <AvatarImage
+                            src={contact.avatarUrl}
+                            alt="Profile"
+                            className="object-cover w-full h-full bg-black"
+                          />
+                        ) : (
+                          <div
+                            className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                          >
+                            {contact.displayName
+                              ? contact.displayName.charAt(0).toUpperCase()
+                              : contact.userId?.charAt(1).toUpperCase()}
+                          </div>
+                        )}
+                      </Avatar>
+                    </div>
+                    <div className="flex flex-col">
+                      <span>
+                        {contact.displayName
+                          ? contact.displayName
+                          : contact.userId?.split(":")[0].slice(1)}
+                      </span>
+                      <span className="text-xs">{contact.userId}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span>
-                      {contact.displayName
-                        ? contact.displayName
-                        : contact.userId?.split(":")[0].slice(1)}
-                    </span>
-                    <span className="text-xs">{contact.userId}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
           {searchedContacts.length <= 0 && (
-            <div className="flex-1 md:flex mt-5 flex-col justify-center items-center duration-1000 transition-all">
+            <div className="flex-1 md:flex mt-5 md:mt-0 flex-col justify-center items-center duration-1000 transition-all">
               <Lottie
                 animationData={animationDefaultOptions.animationData}
                 loop={animationDefaultOptions.loop}
