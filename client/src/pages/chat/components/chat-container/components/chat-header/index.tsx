@@ -45,7 +45,7 @@ const ChatHeader = () => {
 
   return (
     <div className="h-[10vh] border-b-2 border-[#2f303b] flex items-center justify-between px-20">
-      <div className="flex gap-5 items-center">
+      <div className="flex gap-5 items-center w-full justify-between">
         <div className="flex gap-3 items-center justify-center">
           <div className="w-12 h-12 relative">
             <Avatar className="h-12 w-12 rounded-full overflow-hidden">
@@ -66,13 +66,10 @@ const ChatHeader = () => {
               )}
             </Avatar>
           </div>
-          <div className="flex flex-col">
-            <span>
-              {member?.displayName
-                ? member.displayName
-                : member?.userId?.split(":")[0].slice(1)}
-            </span>
-            <span className="text-xs">{member?.userId}</span>
+          <div>
+            {member?.displayName
+              ? member.displayName
+              : member?.userId?.split(":")[0].slice(1)}
           </div>
         </div>
         <div className="flex items-center justify-center gap-5">

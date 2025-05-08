@@ -3,11 +3,14 @@ import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
+import { useMatrix } from "@/lib/matrixContext";
+import { RoomEvent, MatrixEvent } from "matrix-js-sdk";
 
 const MessageBar = () => {
   const emojiRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const { client, selectedRoomId } = useMatrix();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -28,7 +31,46 @@ const MessageBar = () => {
     setMessage((msg) => msg + emojiData.emoji);
   };
 
-  const handleSendMessage = async () => {};
+  const handleSendMessage = async () => {
+    if (!client || !selectedRoomId) return;
+    if (message.trim() === "") return;
+
+    const currentMessage = message;
+    setMessage("");
+
+    try {
+      await client.sendTextMessage(selectedRoomId, currentMessage);
+      setMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!client || !selectedRoomId) return;
+
+    const handleNewEvent = (
+      event: MatrixEvent,
+      room: any,
+      toStartOfTimeline: boolean | undefined
+    ) => {
+      if (toStartOfTimeline) return;
+      if (event.getType() === "m.room.message") {
+        const content = event.getContent();
+        if (content.msgtype === "m.text") {
+          console.log("Отримано повідомлення:", content.body);
+          console.log("Відправник:", event.getSender());
+          console.log("Кімната:", room?.roomId);
+        }
+      }
+    };
+
+    client.on(RoomEvent.Timeline, handleNewEvent);
+
+    return () => {
+      client.off(RoomEvent.Timeline, handleNewEvent);
+    };
+  }, [client, selectedRoomId]);
 
   return (
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6">

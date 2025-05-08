@@ -13,6 +13,7 @@ interface MatrixContextType {
   selectedRoomId: string | null;
   setSelectedRoomId: (roomId: string | null) => void;
   isClientReady: boolean;
+  setIsClientReady: (isReady: boolean) => void;
 }
 
 const MatrixContext = createContext<MatrixContextType | undefined>(undefined);
@@ -91,6 +92,7 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
         selectedRoomId,
         setSelectedRoomId,
         isClientReady,
+        setIsClientReady,
       }}
     >
       {children}

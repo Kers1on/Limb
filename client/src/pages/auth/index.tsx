@@ -19,6 +19,7 @@ import { login, register } from "@/lib/matrixService";
 const Auth = () => {
   const navigate = useNavigate();
   const { setClient } = useMatrix();
+  const { setIsClientReady } = useMatrix();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -125,7 +126,7 @@ const Auth = () => {
 
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
-              console.log("Matrix client is ready!");
+              setIsClientReady(true);
             } else {
               console.log("State is:", state);
             }
