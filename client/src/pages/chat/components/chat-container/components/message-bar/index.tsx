@@ -46,31 +46,32 @@ const MessageBar = () => {
     }
   };
 
-  useEffect(() => {
-    if (!client || !selectedRoomId) return;
+  // useEffect(() => {
+  //   if (!client || !selectedRoomId) return;
 
-    const handleNewEvent = (
-      event: MatrixEvent,
-      room: any,
-      toStartOfTimeline: boolean | undefined
-    ) => {
-      if (toStartOfTimeline) return;
-      if (event.getType() === "m.room.message") {
-        const content = event.getContent();
-        if (content.msgtype === "m.text") {
-          console.log("Отримано повідомлення:", content.body);
-          console.log("Відправник:", event.getSender());
-          console.log("Кімната:", room?.roomId);
-        }
-      }
-    };
+  //   const handleNewEvent = (
+  //     event: MatrixEvent,
+  //     room: any,
+  //     toStartOfTimeline: boolean | undefined
+  //   ) => {
+  //     if (toStartOfTimeline) return;
+  //     if (event.getType() === "m.room.message") {
+  //       const content = event.getContent();
+  //       if (content.msgtype === "m.text") {
+  //         console.log("Отримано повідомлення:", content.body);
+  //         console.log("Відправник:", event.getSender());
+  //         console.log("Час:", event.getTs());
+  //         console.log("Кімната:", room?.roomId);
+  //       }
+  //     }
+  //   };
 
-    client.on(RoomEvent.Timeline, handleNewEvent);
+  //   client.on(RoomEvent.Timeline, handleNewEvent);
 
-    return () => {
-      client.off(RoomEvent.Timeline, handleNewEvent);
-    };
-  }, [client, selectedRoomId]);
+  //   return () => {
+  //     client.off(RoomEvent.Timeline, handleNewEvent);
+  //   };
+  // }, [client, selectedRoomId]);
 
   return (
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6">
