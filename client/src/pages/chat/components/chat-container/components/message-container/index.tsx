@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { getCustomHttpForMxc, isDirectRoomFunc } from "@/lib/clientDataService";
 import moment from "moment";
 import { FileInfo } from "matrix-js-sdk/lib/@types/media";
+import { MdFolderZip } from "react-icons/md";
+import { IoMdArrowDown } from "react-icons/io";
 
 interface Message {
   timeStamp: number;
@@ -209,6 +211,33 @@ function MessageContainer() {
   //   return mimetype.startsWith("audio/");
   // };
 
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes) return "0 B";
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const value = bytes / Math.pow(1024, i);
+    return `${value.toFixed(1)} ${sizes[i]}`;
+  };
+
+  const downloadFile = async (mxcUrl: string | undefined, name: string) => {
+    if (!mxcUrl || !client) return;
+    const url = getCustomHttpForMxc(
+      client.baseUrl,
+      mxcUrl,
+      client.getAccessToken() || ""
+    );
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const urlBlob = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = urlBlob;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(urlBlob);
+  };
+
   const renderMessages = () => {
     let lastDate: string | null = null;
     return messages.map((message, index) => {
@@ -240,33 +269,56 @@ function MessageContainer() {
             message.sender === client?.getUserId()
               ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
               : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-4 rounded my-1 max-w-[50%] break-words`}
+          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
         >
           {message.content}
         </div>
       )}
-      {message.msgtype === MsgType.File &&
-        checkIfFileImage(message.info?.mimetype) && (
-          <div
-            className={`${
-              message.sender === client?.getUserId()
-                ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-                : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-            } border inline-flex p-4 rounded my-1 max-w-[50%] break-words items-center gap-2`}
-          >
-            <img
-              src={getCustomHttpForMxc(
-                client?.baseUrl ?? "",
-                message.mxcUrl || "",
-                client?.getAccessToken() || ""
-              )}
-              alt={message.content}
-              height={50}
-              width={50}
-            />
-            {message.content}
-          </div>
-        )}
+      {message.msgtype === MsgType.File && (
+        <div
+          className={`${
+            message.sender === client?.getUserId()
+              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
+        >
+          {checkIfFileImage(message.info?.mimetype) ? (
+            <div className="flex gap-4 items-up cursor-pointer">
+              <img
+                src={getCustomHttpForMxc(
+                  client?.baseUrl ?? "",
+                  message.mxcUrl || "",
+                  client?.getAccessToken() || ""
+                )}
+                alt={message.content}
+                width={75}
+                className="rounded-md"
+              />
+              <div className="flex flex-col justify-start">
+                <span>{message.content}</span>
+                <span className="text-xs text-white/80 text-left">
+                  {formatFileSize(message.info?.size)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex gap-4 items-up cursor-pointer"
+              onClick={() => downloadFile(message.mxcUrl, message.content)}
+            >
+              <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
+                <MdFolderZip />
+              </span>
+              <div className="flex flex-col justify-start">
+                <span>{message.content}</span>
+                <span className="text-xs text-white/80 text-left">
+                  {formatFileSize(message.info?.size)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <div className="text-xs text-gray-600">
         {moment(message.timeStamp).format("HH:mm")}
       </div>
@@ -276,7 +328,7 @@ function MessageContainer() {
   return (
     <div
       ref={scrollContainerRef}
-      className="flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full"
+      className="flex-1 overflow-y-auto no-scrollbar p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full"
     >
       {renderMessages()}
       <div ref={scrollRef} />
