@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
+import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { useMatrix } from "@/lib/matrixContext";
 import { clearSession } from "@/lib/storageSession";
 import { getColor } from "@/lib/utils";

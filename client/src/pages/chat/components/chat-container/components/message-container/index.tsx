@@ -1,13 +1,17 @@
 import { useMatrix } from "@/lib/matrixContext";
-import { AccountDataEvents, MatrixEvent, RoomEvent } from "matrix-js-sdk";
+import { MatrixEvent, MsgType, RoomEvent } from "matrix-js-sdk";
 import { useEffect, useRef, useState } from "react";
+import { getCustomHttpForMxc, isDirectRoomFunc } from "@/lib/clientDataService";
 import moment from "moment";
+import { FileInfo } from "matrix-js-sdk/lib/@types/media";
 
 interface Message {
   timeStamp: number;
   sender: string | undefined;
   content: string;
   msgtype: string;
+  mxcUrl: string | undefined;
+  info: FileInfo | undefined;
 }
 
 function MessageContainer() {
@@ -17,8 +21,7 @@ function MessageContainer() {
   const [isDirectRoom, setIsDirectRoom] = useState<boolean | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Get old messages when scrolling to the top
-  // No-Tested
+  // Get N old messages when scrolling to the top
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || !client || !selectedRoomId) return;
@@ -37,12 +40,25 @@ function MessageContainer() {
             .filter((event) => event.getType() === "m.room.message")
             .map((event) => {
               const content = event.getContent();
-              if (content.msgtype === "m.text") {
+              if (content.msgtype === MsgType.Text) {
                 return {
                   timeStamp: event.getTs(),
                   sender: event.getSender(),
                   content: content.body,
                   msgtype: content.msgtype,
+                  mxcUrl: undefined,
+                  info: undefined,
+                } as Message;
+              }
+
+              if (content.msgtype === MsgType.File) {
+                return {
+                  timeStamp: event.getTs(),
+                  sender: event.getSender(),
+                  content: content.body,
+                  msgtype: content.msgtype,
+                  mxcUrl: content.url,
+                  info: content.info,
                 } as Message;
               }
               return null;
@@ -85,12 +101,25 @@ function MessageContainer() {
           .filter((event) => event.getType() === "m.room.message")
           .map((event) => {
             const content = event.getContent();
-            if (content.msgtype === "m.text") {
+            if (content.msgtype === MsgType.Text) {
               return {
                 timeStamp: event.getTs(),
                 sender: event.getSender(),
                 content: content.body,
                 msgtype: content.msgtype,
+                mxcUrl: undefined,
+                info: undefined,
+              } as Message;
+            }
+
+            if (content.msgtype === MsgType.File) {
+              return {
+                timeStamp: event.getTs(),
+                sender: event.getSender(),
+                content: content.body,
+                msgtype: content.msgtype,
+                mxcUrl: content.url,
+                info: content.info,
               } as Message;
             }
             return null;
@@ -118,12 +147,27 @@ function MessageContainer() {
       if (toStartOfTimeline) return;
       if (event.getType() === "m.room.message") {
         const content = event.getContent();
-        if (content.msgtype === "m.text") {
+        if (content.msgtype === MsgType.Text) {
           const newMessage: Message = {
             timeStamp: event.getTs(),
             sender: event.getSender(),
             content: content.body,
             msgtype: content.msgtype,
+            mxcUrl: undefined,
+            info: undefined,
+          };
+
+          setMessages((prev) => [...prev, newMessage]);
+        }
+
+        if (content.msgtype === MsgType.File) {
+          const newMessage: Message = {
+            timeStamp: event.getTs(),
+            sender: event.getSender(),
+            content: content.body,
+            msgtype: content.msgtype,
+            mxcUrl: content.url,
+            info: content.info,
           };
 
           setMessages((prev) => [...prev, newMessage]);
@@ -141,33 +185,29 @@ function MessageContainer() {
   // Check if the room is a direct message room
   useEffect(() => {
     if (!client || !selectedRoomId) return;
-
-    const room = client.getRoom(selectedRoomId);
-    if (!room) return;
-
-    const dmMap = client
-      .getAccountData("m.direct" as keyof AccountDataEvents)
-      ?.getContent() as Record<string, string[]>;
-
-    let direct = false;
-    if (dmMap) {
-      for (const [_, roomIds] of Object.entries(dmMap)) {
-        if (roomIds.includes(selectedRoomId)) {
-          direct = true;
-          break;
-        }
-      }
-    }
-
+    const direct = isDirectRoomFunc(client, selectedRoomId);
     setIsDirectRoom(direct);
   }, [client, selectedRoomId]);
 
   // Scroll to the bottom when new messages arrive
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [messages]);
+
+  const checkIfFileImage = (mimetype?: string) => {
+    if (!mimetype) return false;
+    return mimetype.startsWith("image/");
+  };
+  // const checkIfFileVideo = (mimetype?: string) => {
+  //   if (!mimetype) return false;
+  //   return mimetype.startsWith("video/");
+  // };
+  // const checkIfFileAudio = (mimetype?: string) => {
+  //   if (!mimetype) return false;
+  //   return mimetype.startsWith("audio/");
+  // };
 
   const renderMessages = () => {
     let lastDate: string | null = null;
@@ -194,7 +234,7 @@ function MessageContainer() {
         message.sender !== client?.getUserId() ? "text-left" : "text-right"
       }`}
     >
-      {message.msgtype === "m.text" && (
+      {message.msgtype === MsgType.Text && (
         <div
           className={`${
             message.sender === client?.getUserId()
@@ -205,6 +245,28 @@ function MessageContainer() {
           {message.content}
         </div>
       )}
+      {message.msgtype === MsgType.File &&
+        checkIfFileImage(message.info?.mimetype) && (
+          <div
+            className={`${
+              message.sender === client?.getUserId()
+                ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+                : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+            } border inline-flex p-4 rounded my-1 max-w-[50%] break-words items-center gap-2`}
+          >
+            <img
+              src={getCustomHttpForMxc(
+                client?.baseUrl ?? "",
+                message.mxcUrl || "",
+                client?.getAccessToken() || ""
+              )}
+              alt={message.content}
+              height={50}
+              width={50}
+            />
+            {message.content}
+          </div>
+        )}
       <div className="text-xs text-gray-600">
         {moment(message.timeStamp).format("HH:mm")}
       </div>

@@ -1,5 +1,6 @@
 import NewDM from "./components/new-dm";
 import ProfileInfo from "./components/profile-info";
+import ContactList from "@/components/contact-list";
 
 function ContactsContainer() {
   return (
@@ -12,6 +13,9 @@ function ContactsContainer() {
         <div className="flex items-center justify-between pr-10">
           <Title text="Direct Messages" />
           <NewDM />
+        </div>
+        <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
+          <ContactList />
         </div>
       </div>
       <div className="my-5">

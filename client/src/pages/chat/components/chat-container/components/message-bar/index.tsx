@@ -4,10 +4,11 @@ import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
 import EmojiPicker, { Theme, EmojiClickData } from "emoji-picker-react";
 import { useMatrix } from "@/lib/matrixContext";
-import { RoomEvent, MatrixEvent } from "matrix-js-sdk";
+import { MsgType } from "matrix-js-sdk";
 
 const MessageBar = () => {
   const emojiRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const { client, selectedRoomId } = useMatrix();
@@ -46,32 +47,40 @@ const MessageBar = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!client || !selectedRoomId) return;
+  const handleAttachmentClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
-  //   const handleNewEvent = (
-  //     event: MatrixEvent,
-  //     room: any,
-  //     toStartOfTimeline: boolean | undefined
-  //   ) => {
-  //     if (toStartOfTimeline) return;
-  //     if (event.getType() === "m.room.message") {
-  //       const content = event.getContent();
-  //       if (content.msgtype === "m.text") {
-  //         console.log("Отримано повідомлення:", content.body);
-  //         console.log("Відправник:", event.getSender());
-  //         console.log("Час:", event.getTs());
-  //         console.log("Кімната:", room?.roomId);
-  //       }
-  //     }
-  //   };
+  const handleAttachmentChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!client || !selectedRoomId) return;
 
-  //   client.on(RoomEvent.Timeline, handleNewEvent);
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-  //   return () => {
-  //     client.off(RoomEvent.Timeline, handleNewEvent);
-  //   };
-  // }, [client, selectedRoomId]);
+    const file = files[0];
+
+    try {
+      const response = await client.uploadContent(file);
+      const mxcUrl = response.content_uri;
+
+      await client.sendMessage(selectedRoomId, {
+        msgtype: MsgType.File,
+        body: file.name,
+        filename: file.name,
+        url: mxcUrl,
+        info: {
+          mimetype: file.type,
+          size: file.size,
+        },
+      });
+    } catch (error) {
+      console.error("Error sending file:", error);
+    }
+  };
 
   return (
     <div className="h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 mb-6 gap-6">
@@ -85,10 +94,16 @@ const MessageBar = () => {
         />
         <button
           className="text-neutral-500 focus:border-none focus:outline-non focus:text-white duration-300 transition-all cursor-pointer"
-          //   onClick={() => {}}
+          onClick={handleAttachmentClick}
         >
           <GrAttachment className="text-2xl" />
         </button>
+        <input
+          type="file"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleAttachmentChange}
+        />
         <div className="relative">
           <button
             className="text-neutral-500 focus:border-none focus:outline-non focus:text-white duration-300 transition-all cursor-pointer"

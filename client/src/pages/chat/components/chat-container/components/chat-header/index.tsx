@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
+import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { useMatrix } from "@/lib/matrixContext";
 import { getColor } from "@/lib/utils";
 import { useEffect, useState } from "react";

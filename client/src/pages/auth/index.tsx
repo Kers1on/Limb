@@ -14,7 +14,7 @@ import {
   RoomMemberEvent,
   AccountDataEvents,
 } from "matrix-js-sdk";
-import { login, register } from "@/lib/matrixService";
+import { login, register } from "@/lib/matrixAuthService";
 
 const Auth = () => {
   const navigate = useNavigate();

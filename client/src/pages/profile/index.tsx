@@ -8,7 +8,7 @@ import { getColor } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
+import { getCustomHttpForMxc } from "@/lib/clientDataService";
 
 const Profile = () => {
   const navigate = useNavigate();

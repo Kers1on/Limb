@@ -8,12 +8,7 @@ const Chat = () => {
   return (
     <div className="flex h-[100vh] text-white overflow-hidden">
       <ContactsContainer />
-      {selectedRoomId ? (
-        // <ChatContainer roomId={selectedRoomId} />
-        <ChatContainer />
-      ) : (
-        <EmptyChatContainer />
-      )}
+      {selectedRoomId ? <ChatContainer /> : <EmptyChatContainer />}
     </div>
   );
 };

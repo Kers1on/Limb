@@ -20,7 +20,7 @@ import Lottie from "lottie-react";
 import { useMatrix } from "@/lib/matrixContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { getCustomHttpForMxc } from "@/lib/avatarMaxToHttp";
+import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { Preset, AccountDataEvents } from "matrix-js-sdk";
 
 function NewDM() {
