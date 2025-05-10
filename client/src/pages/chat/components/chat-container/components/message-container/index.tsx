@@ -5,7 +5,6 @@ import { getCustomHttpForMxc, isDirectRoomFunc } from "@/lib/clientDataService";
 import moment from "moment";
 import { FileInfo } from "matrix-js-sdk/lib/@types/media";
 import { MdFolderZip } from "react-icons/md";
-import { IoMdArrowDown } from "react-icons/io";
 
 interface Message {
   timeStamp: number;
@@ -22,6 +21,12 @@ function MessageContainer() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isDirectRoom, setIsDirectRoom] = useState<boolean | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showImage, setShowImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  // const [showVideo, setShowVideo] = useState(false);
+  // const [videoUrl, setVideoUrl] = useState(null);
+  // const [showAudio, setShowAudio] = useState(false);
+  // const [audioUrl, setAudioUrl] = useState(null);
 
   // Get N old messages when scrolling to the top
   useEffect(() => {
@@ -283,7 +288,19 @@ function MessageContainer() {
           } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
         >
           {checkIfFileImage(message.info?.mimetype) ? (
-            <div className="flex gap-4 items-up cursor-pointer">
+            <div
+              className="flex gap-4 items-up cursor-pointer"
+              onClick={() => {
+                setShowImage(true);
+                setImageUrl(
+                  getCustomHttpForMxc(
+                    client?.baseUrl ?? "",
+                    message.mxcUrl || "",
+                    client?.getAccessToken() || ""
+                  )
+                );
+              }}
+            >
               <img
                 src={getCustomHttpForMxc(
                   client?.baseUrl ?? "",
@@ -332,6 +349,21 @@ function MessageContainer() {
     >
       {renderMessages()}
       <div ref={scrollRef} />
+      {showImage && (
+        <div
+          className="fixed top-0 left-0 w-full h-full backdrop-blur-lg flex flex-col items-center justify-center z-[50]"
+          onClick={() => {
+            setShowImage(false);
+            setImageUrl(null);
+          }}
+        >
+          <img
+            src={imageUrl ?? ""}
+            alt="Preview"
+            className="max-h-[100vh] max-w-[100vh] bg-cover"
+          />
+        </div>
+      )}
     </div>
   );
 }
