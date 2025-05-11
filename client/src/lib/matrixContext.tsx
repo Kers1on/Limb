@@ -14,6 +14,15 @@ interface MatrixContextType {
   setSelectedRoomId: (roomId: string | null) => void;
   isClientReady: boolean;
   setIsClientReady: (isReady: boolean) => void;
+
+  isUploading: boolean;
+  setIsUploading: (isUploading: boolean) => void;
+  isDownloading: boolean;
+  setIsDownloading: (isDownloading: boolean) => void;
+  fileUploadProgress: number;
+  setFileUploadProgress: (progress: number) => void;
+  fileDownloadProgress: number;
+  setFileDownloadProgress: (progress: number) => void;
 }
 
 const MatrixContext = createContext<MatrixContextType | undefined>(undefined);
@@ -25,9 +34,12 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedRoomId, setSelectedRoomIdState] = useState<string | null>(
     null
   );
-  const [isClientReady, setIsClientReady] = useState(false);
-
   const [isRestoring, setIsRestoring] = useState(true);
+  const [isClientReady, setIsClientReady] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [fileUploadProgress, setFileUploadProgress] = useState(0);
+  const [fileDownloadProgress, setFileDownloadProgress] = useState(0);
 
   const setSelectedRoomId = (roomId: string | null) => {
     setSelectedRoomIdState(roomId);
@@ -93,6 +105,14 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedRoomId,
         isClientReady,
         setIsClientReady,
+        isUploading,
+        setIsUploading,
+        isDownloading,
+        setIsDownloading,
+        fileUploadProgress,
+        setFileUploadProgress,
+        fileDownloadProgress,
+        setFileDownloadProgress,
       }}
     >
       {children}

@@ -5,6 +5,7 @@ import { getCustomHttpForMxc, isDirectRoomFunc } from "@/lib/clientDataService";
 import moment from "moment";
 import { FileInfo } from "matrix-js-sdk/lib/@types/media";
 import { MdFolderZip } from "react-icons/md";
+import { IoMdArrowDown } from "react-icons/io";
 
 interface Message {
   timeStamp: number;
@@ -17,16 +18,35 @@ interface Message {
 
 function MessageContainer() {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { client, selectedRoomId } = useMatrix();
+  const { client, selectedRoomId, setIsDownloading, setFileDownloadProgress } =
+    useMatrix();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isDirectRoom, setIsDirectRoom] = useState<boolean | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showImage, setShowImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageMxcUrl, setImageMxcUrl] = useState<string | null>(null);
   // const [showVideo, setShowVideo] = useState(false);
   // const [videoUrl, setVideoUrl] = useState(null);
+  // const [videoMxcUrl, setVideoMxcUrl] = useState<string | null>(null);
   // const [showAudio, setShowAudio] = useState(false);
   // const [audioUrl, setAudioUrl] = useState(null);
+  // const [audioMxcUrl, setAudioMxcUrl] = useState<string | null>(null);
+
+  const parseMatrixEvent = (event: MatrixEvent): Message | null => {
+    const content = event.getContent();
+    if (content.msgtype === MsgType.Text || content.msgtype === MsgType.File) {
+      return {
+        timeStamp: event.getTs(),
+        sender: event.getSender(),
+        content: content.body,
+        msgtype: content.msgtype,
+        mxcUrl: content.url,
+        info: content.info,
+      };
+    }
+    return null;
+  };
 
   // Get N old messages when scrolling to the top
   useEffect(() => {
@@ -46,35 +66,12 @@ function MessageContainer() {
           const events = room.timeline
             .filter((event) => event.getType() === "m.room.message")
             .map((event) => {
-              const content = event.getContent();
-              if (content.msgtype === MsgType.Text) {
-                return {
-                  timeStamp: event.getTs(),
-                  sender: event.getSender(),
-                  content: content.body,
-                  msgtype: content.msgtype,
-                  mxcUrl: undefined,
-                  info: undefined,
-                } as Message;
-              }
-
-              if (content.msgtype === MsgType.File) {
-                return {
-                  timeStamp: event.getTs(),
-                  sender: event.getSender(),
-                  content: content.body,
-                  msgtype: content.msgtype,
-                  mxcUrl: content.url,
-                  info: content.info,
-                } as Message;
-              }
-              return null;
+              return parseMatrixEvent(event);
             })
             .filter((msg): msg is Message => msg !== null);
 
           setMessages(events);
 
-          // Після оновлення повідомлень — зберегти позицію скролу
           setTimeout(() => {
             container.scrollTop = container.scrollHeight - prevScrollHeight;
           }, 0);
@@ -107,29 +104,7 @@ function MessageContainer() {
           .getEvents()
           .filter((event) => event.getType() === "m.room.message")
           .map((event) => {
-            const content = event.getContent();
-            if (content.msgtype === MsgType.Text) {
-              return {
-                timeStamp: event.getTs(),
-                sender: event.getSender(),
-                content: content.body,
-                msgtype: content.msgtype,
-                mxcUrl: undefined,
-                info: undefined,
-              } as Message;
-            }
-
-            if (content.msgtype === MsgType.File) {
-              return {
-                timeStamp: event.getTs(),
-                sender: event.getSender(),
-                content: content.body,
-                msgtype: content.msgtype,
-                mxcUrl: content.url,
-                info: content.info,
-              } as Message;
-            }
-            return null;
+            return parseMatrixEvent(event);
           })
           .filter((msg): msg is Message => msg !== null);
 
@@ -154,20 +129,10 @@ function MessageContainer() {
       if (toStartOfTimeline) return;
       if (event.getType() === "m.room.message") {
         const content = event.getContent();
-        if (content.msgtype === MsgType.Text) {
-          const newMessage: Message = {
-            timeStamp: event.getTs(),
-            sender: event.getSender(),
-            content: content.body,
-            msgtype: content.msgtype,
-            mxcUrl: undefined,
-            info: undefined,
-          };
-
-          setMessages((prev) => [...prev, newMessage]);
-        }
-
-        if (content.msgtype === MsgType.File) {
+        if (
+          content.msgtype === MsgType.Text ||
+          content.msgtype === MsgType.File
+        ) {
           const newMessage: Message = {
             timeStamp: event.getTs(),
             sender: event.getSender(),
@@ -197,11 +162,11 @@ function MessageContainer() {
   }, [client, selectedRoomId]);
 
   // Scroll to the bottom when new messages arrive
-  // useEffect(() => {
-  //   if (scrollRef.current) {
-  //     scrollRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [messages]);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const checkIfFileImage = (mimetype?: string) => {
     if (!mimetype) return false;
@@ -226,21 +191,54 @@ function MessageContainer() {
 
   const downloadFile = async (mxcUrl: string | undefined, name: string) => {
     if (!mxcUrl || !client) return;
+
+    setIsDownloading(true);
+    setFileDownloadProgress(0);
+
     const url = getCustomHttpForMxc(
       client.baseUrl,
       mxcUrl,
       client.getAccessToken() || ""
     );
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const urlBlob = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = urlBlob;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(urlBlob);
+
+    try {
+      const response = await fetch(url);
+      const contentLength = response.headers.get("Content-Length");
+
+      if (!response.ok || !response.body || !contentLength) {
+        throw new Error("Download failed or streaming not supported.");
+      }
+
+      const total = parseInt(contentLength, 10);
+      const reader = response.body.getReader();
+      let received = 0;
+      const chunks = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          received += value.length;
+          const progress = Math.round((received / total) * 100);
+          setFileDownloadProgress(progress);
+        }
+      }
+
+      const blob = new Blob(chunks);
+      const urlBlob = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = urlBlob;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(urlBlob);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const renderMessages = () => {
@@ -299,6 +297,7 @@ function MessageContainer() {
                     client?.getAccessToken() || ""
                   )
                 );
+                setImageMxcUrl(message.mxcUrl || "");
               }}
             >
               <img
@@ -362,6 +361,14 @@ function MessageContainer() {
             alt="Preview"
             className="max-h-[100vh] max-w-[100vh] bg-cover"
           />
+          <div className="flex gap-5 fixed bottom-5">
+            <button
+              className="bg-black/20 rounded-full p-3 text-2xl hover:bg-black/50 duration-300 transition-all cursor-pointer"
+              onClick={() => downloadFile(imageMxcUrl ?? "", "image.jpg")}
+            >
+              <IoMdArrowDown />
+            </button>
+          </div>
         </div>
       )}
     </div>

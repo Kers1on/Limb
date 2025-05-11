@@ -11,7 +11,8 @@ const MessageBar = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const { client, selectedRoomId } = useMatrix();
+  const { client, selectedRoomId, setIsUploading, setFileUploadProgress } =
+    useMatrix();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,8 +65,20 @@ const MessageBar = () => {
     const file = files[0];
 
     try {
-      const response = await client.uploadContent(file);
+      setIsUploading(true);
+      setFileUploadProgress(0);
+
+      const response = await client.uploadContent(file, {
+        progressHandler: (progress) => {
+          const percentage = Math.round(
+            (progress.loaded / progress.total) * 100
+          );
+          setFileUploadProgress(percentage);
+        },
+      });
+
       const mxcUrl = response.content_uri;
+      setIsUploading(false);
 
       await client.sendMessage(selectedRoomId, {
         msgtype: MsgType.File,
@@ -78,6 +91,7 @@ const MessageBar = () => {
         },
       });
     } catch (error) {
+      setIsUploading(false);
       console.error("Error sending file:", error);
     }
   };
