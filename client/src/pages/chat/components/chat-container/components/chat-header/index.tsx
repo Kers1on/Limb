@@ -8,10 +8,12 @@ import { RiCloseFill } from "react-icons/ri";
 const ChatHeader = () => {
   const { client, selectedRoomId, setSelectedRoomId, isClientReady } =
     useMatrix();
+
   const [member, setMember] = useState<{
-    userId: string;
+    userId?: string;
     displayName: string;
     avatarUrl: string | null;
+    isGroup: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -20,26 +22,50 @@ const ChatHeader = () => {
     const room = client.getRoom(selectedRoomId);
     if (!room) return;
 
-    const myUserId = client.getUserId();
-    const joinedMembers = room.getJoinedMembers();
+    // 1. Перевіряємо чи є m.room.topic з типом group
+    const topicEvent = room.currentState.getStateEvents("m.room.topic", "");
+    const isGroup = topicEvent?.getContent()?.type === "group";
 
-    const otherMember = joinedMembers.find((m) => m.userId !== myUserId);
+    if (isGroup) {
+      const name = room.name || "Група";
+      const avatarMxc = room.getMxcAvatarUrl() || "";
+      const avatarUrl = avatarMxc
+        ? getCustomHttpForMxc(
+            client.baseUrl,
+            avatarMxc,
+            client.getAccessToken() || ""
+          )
+        : null;
 
-    if (otherMember) {
-      const member = {
-        userId: otherMember.userId,
-        displayName: otherMember.name || otherMember.userId,
-        avatarUrl: otherMember.getMxcAvatarUrl()
+      setMember({
+        displayName: name,
+        avatarUrl,
+        isGroup: true,
+      });
+    } else {
+      const myUserId = client.getUserId();
+      const joinedMembers = room.getJoinedMembers();
+      const otherMember = joinedMembers.find((m) => m.userId !== myUserId);
+
+      if (otherMember) {
+        const avatarMxc = otherMember.getMxcAvatarUrl() || "";
+        const avatarUrl = avatarMxc
           ? getCustomHttpForMxc(
               client.baseUrl,
-              otherMember.getMxcAvatarUrl() || "",
+              avatarMxc,
               client.getAccessToken() || ""
             )
-          : null,
-      };
-      setMember(member);
-    } else {
-      setMember(null);
+          : null;
+
+        setMember({
+          userId: otherMember.userId,
+          displayName: otherMember.name || otherMember.userId,
+          avatarUrl,
+          isGroup: false,
+        });
+      } else {
+        setMember(null);
+      }
     }
   }, [client, selectedRoomId, isClientReady]);
 
@@ -48,23 +74,29 @@ const ChatHeader = () => {
       <div className="flex gap-5 items-center w-full justify-between">
         <div className="flex gap-3 items-center justify-center">
           <div className="w-12 h-12 relative">
-            <Avatar className="h-12 w-12 rounded-full overflow-hidden">
-              {member?.avatarUrl ? (
-                <AvatarImage
-                  src={member.avatarUrl}
-                  alt="Profile"
-                  className="object-cover w-full h-full bg-black"
-                />
-              ) : (
-                <div
-                  className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
-                >
-                  {member?.displayName
-                    ? member.displayName.charAt(0).toUpperCase()
-                    : member?.userId?.charAt(1).toUpperCase()}
-                </div>
-              )}
-            </Avatar>
+            {!member?.isGroup ? (
+              <Avatar className="h-12 w-12 rounded-full overflow-hidden">
+                {member?.avatarUrl ? (
+                  <AvatarImage
+                    src={member.avatarUrl}
+                    alt="Profile"
+                    className="object-cover w-full h-full bg-black"
+                  />
+                ) : (
+                  <div
+                    className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                  >
+                    {member?.displayName
+                      ? member.displayName.charAt(0).toUpperCase()
+                      : member?.userId?.charAt(1).toUpperCase()}
+                  </div>
+                )}
+              </Avatar>
+            ) : (
+              <div className="bg-[#ffffff22] h-10 w-10 flex items-center justify-center rounded-full">
+                #
+              </div>
+            )}
           </div>
           <div>
             {member?.displayName

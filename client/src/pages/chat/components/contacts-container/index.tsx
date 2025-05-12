@@ -2,6 +2,7 @@ import CreateChannel from "./components/create-channel";
 import NewDM from "./components/new-dm";
 import ProfileInfo from "./components/profile-info";
 import ContactList from "@/components/contact-list";
+import GroupChannelList from "@/components/group-channel-list";
 
 function ContactsContainer() {
   return (
@@ -23,6 +24,9 @@ function ContactsContainer() {
         <div className="flex items-center justify-between pr-10">
           <Title text="Channels" />
           <CreateChannel />
+        </div>
+        <div className="max-h-[38vh] overflow-y-auto no-scrollbar">
+          <GroupChannelList />
         </div>
       </div>
       <ProfileInfo />

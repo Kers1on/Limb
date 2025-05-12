@@ -17,7 +17,6 @@ const ContactList = () => {
     useMatrix();
   const [directContacts, setDirectContacts] = useState<ContactMember[]>([]);
 
-  // Get the direct messages from the account data
   useEffect(() => {
     if (!client || !isClientReady) return;
 
@@ -34,6 +33,14 @@ const ContactList = () => {
           for (const roomId of roomIds) {
             const room = rooms.find((r) => r.roomId === roomId);
             if (!room) continue;
+
+            // ❌ Пропускаємо кімнати з topic === "group"
+            const topicEvent = room.currentState.getStateEvents(
+              "m.room.topic",
+              ""
+            );
+            const topic = topicEvent?.getContent()?.topic;
+            if (topic === "group") continue;
 
             const myUserId = client.getUserId();
             const otherMember = room
@@ -84,51 +91,42 @@ const ContactList = () => {
 
   return (
     <div className="mt-5">
-      {directContacts.map((member) => {
-        return (
-          <div
-            key={member.roomId}
-            className={`pl-10 py-2 transition-all duration-300 cursor-pointer ${
-              selectedRoomId === member.roomId
-                ? "bg-[#8417ff] hover:bg-[#8417ff]"
-                : "hover:bg-[#f1f1f111]"
-            }`}
-            onClick={() => handleClick(member.roomId)}
-          >
-            <div className="flex gap-5 items-center justify-start text-neutral-300">
-              {
-                <Avatar className="h-10 w-10 rounded-full overflow-hidden">
-                  {member?.avatarUrl ? (
-                    <AvatarImage
-                      src={member.avatarUrl}
-                      alt="Profile"
-                      className="object-cover w-full h-full bg-black"
-                    />
-                  ) : (
-                    <div
-                      className={`${
-                        selectedRoomId === member.roomId
-                          ? "bg-[ffffff22] border-2 border-white/70"
-                          : getColor()
-                      } h-10 w-10 text-lg border-[1px] flex items-center justify-center rounded-full`}
-                    >
-                      {member?.displayName
-                        ? member.displayName.charAt(0).toUpperCase()
-                        : member?.userId?.charAt(1).toUpperCase()}
-                    </div>
-                  )}
-                </Avatar>
-              }
-              {client && !isDirectRoomFunc(client, member.roomId) && (
-                <div className="bg-[#ffffff22] h-10 w-10 flex items-center justify-center rounded-full">
-                  #
+      {directContacts.map((member) => (
+        <div
+          key={member.roomId}
+          className={`pl-10 py-2 transition-all duration-300 cursor-pointer ${
+            selectedRoomId === member.roomId
+              ? "bg-[#8417ff] hover:bg-[#8417ff]"
+              : "hover:bg-[#f1f1f111]"
+          }`}
+          onClick={() => handleClick(member.roomId)}
+        >
+          <div className="flex gap-5 items-center justify-start text-neutral-300">
+            <Avatar className="h-10 w-10 rounded-full overflow-hidden">
+              {member.avatarUrl ? (
+                <AvatarImage
+                  src={member.avatarUrl}
+                  alt="Profile"
+                  className="object-cover w-full h-full bg-black"
+                />
+              ) : (
+                <div
+                  className={`${
+                    selectedRoomId === member.roomId
+                      ? "bg-[ffffff22] border-2 border-white/70"
+                      : getColor()
+                  } h-10 w-10 text-lg border-[1px] flex items-center justify-center rounded-full`}
+                >
+                  {member.displayName
+                    ? member.displayName.charAt(0).toUpperCase()
+                    : member.userId.charAt(1).toUpperCase()}
                 </div>
               )}
-              <span>{client?.getRoom(member.roomId)?.name}</span>
-            </div>
+            </Avatar>
+            <span>{client?.getRoom(member.roomId)?.name}</span>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 };

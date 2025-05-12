@@ -15,22 +15,16 @@ import {
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { animationDefaultOptions, getColor } from "@/lib/utils";
-import Lottie from "lottie-react";
 import { useMatrix } from "@/lib/matrixContext";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { Preset, AccountDataEvents } from "matrix-js-sdk";
 import { Button } from "@/components/ui/button";
 import MultipleSelector from "@/components/ui/multipleselect";
+import { getColor } from "@/lib/utils";
 
 function CreateChannel() {
   const { client, setSelectedRoomId, isClientReady } = useMatrix();
   const [newChannelModal, setNewChannelModal] = useState(false);
-  const [searchedContacts, setSearchedContacts] = useState<
-    { userId: string; displayName: string; avatarUrl: string | null }[]
-  >([]);
   const [allContacts, setAllContacts] = useState<
     { userId: string; displayName: string; avatarUrl: string | null }[]
   >([]);
@@ -91,7 +85,41 @@ function CreateChannel() {
     fetchContacts();
   }, [client, isClientReady]);
 
-  const createChannel = async () => {};
+  const createChannel = async () => {
+    if (!client || !channelName || selectedContacts.length === 0) return;
+
+    try {
+      const invitedUserIds = selectedContacts.map((contact) => contact.userId);
+
+      const response = await client.createRoom({
+        name: channelName,
+        preset: Preset.PrivateChat,
+        invite: invitedUserIds,
+        is_direct: false,
+        initial_state: [
+          {
+            type: "m.room.topic",
+            state_key: "",
+            content: {
+              topic: "No Topic",
+              type: "group",
+            },
+          },
+        ],
+      });
+
+      const roomId = response.room_id;
+
+      if (roomId) {
+        // setSelectedRoomId(roomId);
+        setNewChannelModal(false);
+        setChannelName("");
+        setSelectedContacts([]);
+      }
+    } catch (error) {
+      console.error("Failed to create channel:", error);
+    }
+  };
 
   return (
     <>

@@ -89,9 +89,20 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
               member.userId === restoredClient.getUserId()
             ) {
               const roomId = member.roomId;
-
               const room = restoredClient.getRoom(roomId);
               if (!room) return;
+
+              // 👉 Перевірка на наявність події m.room.topic
+              const topicEvent = room.currentState.getStateEvents(
+                "m.room.topic",
+                ""
+              );
+              const isGroupRoom = !!topicEvent;
+
+              if (isGroupRoom) {
+                // Це група, не додаємо в m.direct
+                return;
+              }
 
               const otherMember = room
                 .getJoinedMembers()

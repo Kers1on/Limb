@@ -27,7 +27,7 @@ docker run -it --rm `
 
 ### Create /matrix/.env and put this
 
-```bash
+```env
 SYNAPSE_SERVER_NAME=localhost
 SYNAPSE_REPORT_STATS=no
 ```
@@ -66,6 +66,16 @@ enable_registration_without_verification: true
 enable_search: true
 ```
 
+### Create First Public Room for indexation
+
+### After creating room put roomId in client/src/pages/auth/index.tsx in handleRegistration()
+
+```tsx
+client.startClient();
+client.joinRoom("!hgmQxZqDMihGSKTHlk:localhost"); // Join a public room for indexation
+setClient(client);
+```
+
 ## Client
 
 ```bash
@@ -75,7 +85,7 @@ npm install
 
 ### Create /client/.env and put this
 
-```bash
+```env
 VITE_BASE_URL="http://localhost:8008"
 ```
 
