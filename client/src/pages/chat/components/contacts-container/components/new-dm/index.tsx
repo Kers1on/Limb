@@ -121,7 +121,8 @@ function NewDM() {
         updatedDirectMap
       );
 
-      setSelectedRoomId(newRoomId);
+      // setSelectedRoomId(newRoomId);
+      // Зробити візуалізацію отримання повідомлення, що запрошення надіслано
       setOpenNewContantModal(false);
       setSearchedContacts([]);
     } catch (err) {

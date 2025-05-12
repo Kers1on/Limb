@@ -8,18 +8,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useMatrix } from "@/lib/matrixContext";
-import {
-  createClient,
-  ClientEvent,
-  RoomMemberEvent,
-  AccountDataEvents,
-} from "matrix-js-sdk";
+import { createClient, ClientEvent } from "matrix-js-sdk";
 import { login, register } from "@/lib/matrixAuthService";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { setClient } = useMatrix();
-  const { setIsClientReady } = useMatrix();
+  const { setClient, setIsClientReady } = useMatrix();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -66,73 +60,13 @@ const Auth = () => {
             useAuthorizationHeader: true,
           });
 
-          // 👇 Auto-join при інвайті TEMP
-          client.on(RoomMemberEvent.Membership, (_, member) => {
-            if (
-              member.membership === "invite" &&
-              member.userId === client.getUserId()
-            ) {
-              client.joinRoom(member.roomId).catch((err) => {
-                console.error("Auto-join failed:", err);
-              });
-            }
-          });
-
-          // 👇 Додаємо кімнату до m.direct при приєднанні TEMP
-          client.on(RoomMemberEvent.Membership, async (_, member) => {
-            if (
-              member.membership === "join" &&
-              member.userId === client.getUserId()
-            ) {
-              const roomId = member.roomId;
-
-              const room = client.getRoom(roomId);
-              if (!room) return;
-
-              const otherMember = room
-                .getJoinedMembers()
-                .find((m) => m.userId !== client.getUserId());
-              if (!otherMember) return;
-
-              const directEvent = client.getAccountData(
-                "m.direct" as keyof AccountDataEvents
-              );
-              const directMap = (directEvent?.getContent() || {}) as Record<
-                string,
-                string[]
-              >;
-
-              const currentRooms = directMap[otherMember.userId] || [];
-
-              if (!currentRooms.includes(roomId)) {
-                const updatedMap = {
-                  ...directMap,
-                  [otherMember.userId]: [...currentRooms, roomId],
-                };
-
-                await client.setAccountData(
-                  "m.direct" as keyof AccountDataEvents,
-                  updatedMap
-                );
-                console.log("Updated m.direct for:", otherMember.userId);
-              }
-            }
-          });
-
-          // await client.setAccountData(
-          //   "m.direct" as keyof AccountDataEvents,
-          //   {}
-          // );
-
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
               setIsClientReady(true);
-            } else {
-              console.log("State is:", state);
             }
           });
 
-          await client.startClient();
+          client.startClient();
           setClient(client);
           navigate("/profile");
         } else {
@@ -161,14 +95,12 @@ const Auth = () => {
 
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
-              console.log("Matrix client is ready!");
-            } else {
-              console.log("State is:", state);
+              setIsClientReady(true);
             }
           });
 
-          await client.startClient();
-          await client.joinRoom("!hgmQxZqDMihGSKTHlk:localhost"); // Join a public room for indexation
+          client.startClient();
+          client.joinRoom("!hgmQxZqDMihGSKTHlk:localhost"); // Join a public room for indexation
           setClient(client);
           navigate("/profile");
         }

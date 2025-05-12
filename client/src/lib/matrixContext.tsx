@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { createClient, MatrixClient, ClientEvent } from "matrix-js-sdk";
+import {
+  createClient,
+  MatrixClient,
+  ClientEvent,
+  RoomMemberEvent,
+  AccountDataEvents,
+} from "matrix-js-sdk";
 import {
   getSession,
   saveSelectedRoomId,
@@ -62,6 +68,59 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
             userId,
             deviceId,
             useAuthorizationHeader: true,
+          });
+
+          // 👇 Auto-join при інвайті TEMP
+          restoredClient.on(RoomMemberEvent.Membership, (_, member) => {
+            if (
+              member.membership === "invite" &&
+              member.userId === restoredClient.getUserId()
+            ) {
+              restoredClient.joinRoom(member.roomId).catch((err) => {
+                console.error("Auto-join failed:", err);
+              });
+            }
+          });
+
+          // 👇 Додаємо кімнату до m.direct при приєднанні TEMP
+          restoredClient.on(RoomMemberEvent.Membership, async (_, member) => {
+            if (
+              member.membership === "join" &&
+              member.userId === restoredClient.getUserId()
+            ) {
+              const roomId = member.roomId;
+
+              const room = restoredClient.getRoom(roomId);
+              if (!room) return;
+
+              const otherMember = room
+                .getJoinedMembers()
+                .find((m) => m.userId !== restoredClient.getUserId());
+              if (!otherMember) return;
+
+              const directEvent = restoredClient.getAccountData(
+                "m.direct" as keyof AccountDataEvents
+              );
+              const directMap = (directEvent?.getContent() || {}) as Record<
+                string,
+                string[]
+              >;
+
+              const currentRooms = directMap[otherMember.userId] || [];
+
+              if (!currentRooms.includes(roomId)) {
+                const updatedMap = {
+                  ...directMap,
+                  [otherMember.userId]: [...currentRooms, roomId],
+                };
+
+                await restoredClient.setAccountData(
+                  "m.direct" as keyof AccountDataEvents,
+                  updatedMap
+                );
+                console.log("Updated m.direct for:", otherMember.userId);
+              }
+            }
           });
 
           restoredClient.once(ClientEvent.Sync, (state) => {

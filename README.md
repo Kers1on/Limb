@@ -1,19 +1,11 @@
-## Клієнт
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-## 🐳 Сервер (Matrix Synapse)
+## 🐳 Server (Matrix Synapse)
 
 ```bash
 cd ../matrix
 mkdir data
 ```
 
-### Генерація конфігурації (MacOS)
+### Config generation (MacOS)
 
 ```bash
 docker run -it --rm \
@@ -23,7 +15,7 @@ docker run -it --rm \
     matrixdotorg/synapse:latest generate
 ```
 
-### Генерація конфігурації (Windows PowerShell)
+### Config generation (Windows PowerShell)
 
 ```bash
 docker run -it --rm `
@@ -33,47 +25,62 @@ docker run -it --rm `
     matrixdotorg/synapse:latest generate
 ```
 
-### Створити /matrix/.env і вписати
+### Create /matrix/.env and put this
 
 ```bash
 SYNAPSE_SERVER_NAME=localhost
 SYNAPSE_REPORT_STATS=no
 ```
 
-### Створити /client/.env і вписати
-
-```bash
-VITE_BASE_URL="http://localhost:8008"
-```
-
-### Запуск
+### Start
 
 ```bash
 docker-compose up -d
 ```
 
-### Зупинка
+### Stop
 
 ```bash
 docker-compose down
 ```
 
-### Перевірка
+### Checkout
 
 ```bash
 curl http://localhost:8008/_matrix/client/versions
 ```
 
-## Вхід у Matrix (MacOS)
+### Open matrix/data/homeserver.yaml and put these
 
 ```bash
-docker exec -it matrix-synapse register_new_matrix_user \
-    -c /data/homeserver.yaml http://localhost:8008
+resources:
+      - names: [client, federation, media]
+        compress: false
 ```
 
-## Вхід у Matrix (Windows PowerShell)
+after "media_store_path:"
 
 ```bash
-docker exec -it matrix-synapse register_new_matrix_user `
-    -c /data/homeserver.yaml http://localhost:8008
+enable_registration: true
+enable_registration_without_verification: true
+enable_search: true
+```
+
+## Client
+
+```bash
+cd client
+npm install
+```
+
+### Create /client/.env and put this
+
+```bash
+VITE_BASE_URL="http://localhost:8008"
+```
+
+### Start Client
+
+```bash
+npm run dev
 ```
