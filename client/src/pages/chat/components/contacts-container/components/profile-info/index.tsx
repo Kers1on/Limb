@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 function ProfileInfo() {
   const navigate = useNavigate();
-  const { client, setClient } = useMatrix();
+  const { client, setClient, setSelectedRoomId } = useMatrix();
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string>("");
   const [image, setImage] = useState<string | null>(null);
@@ -63,6 +63,7 @@ function ProfileInfo() {
         await client.logout();
         clearSession();
         navigate("/auth");
+        setSelectedRoomId(null);
         setClient(null);
       } else {
         console.error("Matrix client is not available.");

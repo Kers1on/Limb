@@ -1,11 +1,19 @@
 import { useMatrix } from "@/lib/matrixContext";
-import { MatrixEvent, MsgType, RoomEvent } from "matrix-js-sdk";
+import {
+  MatrixClient,
+  MatrixEvent,
+  MsgType,
+  Room,
+  RoomEvent,
+} from "matrix-js-sdk";
 import { useEffect, useRef, useState } from "react";
 import { getCustomHttpForMxc, isDirectRoomFunc } from "@/lib/clientDataService";
 import moment from "moment";
 import { FileInfo } from "matrix-js-sdk/lib/@types/media";
 import { MdFolderZip } from "react-icons/md";
 import { IoMdArrowDown } from "react-icons/io";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getColor } from "@/lib/utils";
 
 interface Message {
   timeStamp: number;
@@ -14,6 +22,8 @@ interface Message {
   msgtype: string;
   mxcUrl: string | undefined;
   info: FileInfo | undefined;
+  senderDisplayName: string | undefined;
+  senderAvatarUrl: string | undefined;
 }
 
 function MessageContainer() {
@@ -33,9 +43,22 @@ function MessageContainer() {
   // const [audioUrl, setAudioUrl] = useState(null);
   // const [audioMxcUrl, setAudioMxcUrl] = useState<string | null>(null);
 
-  const parseMatrixEvent = (event: MatrixEvent): Message | null => {
+  const parseMatrixEvent = (
+    event: MatrixEvent,
+    room: Room,
+    senderId: string,
+    client: MatrixClient
+  ): Message | null => {
     const content = event.getContent();
     if (content.msgtype === MsgType.Text || content.msgtype === MsgType.File) {
+      const member = room?.getMember(senderId);
+      const displayName = member?.name;
+      const avatarUrl = getCustomHttpForMxc(
+        client.baseUrl,
+        member?.getMxcAvatarUrl() || "",
+        client.getAccessToken() || ""
+      );
+
       return {
         timeStamp: event.getTs(),
         sender: event.getSender(),
@@ -43,6 +66,8 @@ function MessageContainer() {
         msgtype: content.msgtype,
         mxcUrl: content.url,
         info: content.info,
+        senderDisplayName: displayName,
+        senderAvatarUrl: avatarUrl,
       };
     }
     return null;
@@ -66,7 +91,10 @@ function MessageContainer() {
           const events = room.timeline
             .filter((event) => event.getType() === "m.room.message")
             .map((event) => {
-              return parseMatrixEvent(event);
+              const senderId = event.getSender();
+              if (!senderId) return;
+
+              return parseMatrixEvent(event, room, senderId, client);
             })
             .filter((msg): msg is Message => msg !== null);
 
@@ -104,7 +132,10 @@ function MessageContainer() {
           .getEvents()
           .filter((event) => event.getType() === "m.room.message")
           .map((event) => {
-            return parseMatrixEvent(event);
+            const senderId = event.getSender();
+            if (!senderId) return;
+
+            return parseMatrixEvent(event, room, senderId, client);
           })
           .filter((msg): msg is Message => msg !== null);
 
@@ -133,13 +164,28 @@ function MessageContainer() {
           content.msgtype === MsgType.Text ||
           content.msgtype === MsgType.File
         ) {
+          const room = client.getRoom(selectedRoomId);
+          const senderId = event.getSender();
+
+          if (!senderId) return;
+
+          const member = room?.getMember(senderId);
+          const displayName = member?.name;
+          const avatarUrl = getCustomHttpForMxc(
+            client.baseUrl,
+            member?.getMxcAvatarUrl() || "",
+            client.getAccessToken() || ""
+          );
+
           const newMessage: Message = {
             timeStamp: event.getTs(),
-            sender: event.getSender(),
+            sender: senderId,
             content: content.body,
             msgtype: content.msgtype,
             mxcUrl: content.url,
             info: content.info,
+            senderAvatarUrl: avatarUrl,
+            senderDisplayName: displayName,
           };
 
           setMessages((prev) => [...prev, newMessage]);
@@ -254,7 +300,8 @@ function MessageContainer() {
               {moment(message.timeStamp).format("DD.MM.YYYY")}
             </div>
           )}
-          {isDirectRoom === true && renderDMMessages(message)}
+          {isDirectRoom && renderDMMessages(message)}
+          {!isDirectRoom && renderChannelMessages(message)}
         </div>
       );
     });
@@ -338,6 +385,115 @@ function MessageContainer() {
       <div className="text-xs text-gray-600">
         {moment(message.timeStamp).format("HH:mm")}
       </div>
+    </div>
+  );
+
+  const renderChannelMessages = (message: Message) => (
+    <div
+      className={`${
+        message.sender !== client?.getUserId() ? "text-left" : "text-right"
+      }`}
+    >
+      {message.msgtype === MsgType.Text && (
+        <div
+          className={`${
+            message.sender === client?.getUserId()
+              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+          } border inline-block p-2 rounded my-1 max-w-[50%] break-words ml-9`}
+        >
+          {message.content}
+        </div>
+      )}
+      {message.msgtype === MsgType.File && (
+        <div
+          className={`${
+            message.sender === client?.getUserId()
+              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+          } border inline-block p-2 rounded my-1 max-w-[50%] break-words ml-9`}
+        >
+          {checkIfFileImage(message.info?.mimetype) ? (
+            <div
+              className="flex gap-4 items-up cursor-pointer"
+              onClick={() => {
+                setShowImage(true);
+                setImageUrl(
+                  getCustomHttpForMxc(
+                    client?.baseUrl ?? "",
+                    message.mxcUrl || "",
+                    client?.getAccessToken() || ""
+                  )
+                );
+                setImageMxcUrl(message.mxcUrl || "");
+              }}
+            >
+              <img
+                src={getCustomHttpForMxc(
+                  client?.baseUrl ?? "",
+                  message.mxcUrl || "",
+                  client?.getAccessToken() || ""
+                )}
+                alt={message.content}
+                width={75}
+                className="rounded-md"
+              />
+              <div className="flex flex-col justify-start">
+                <span>{message.content}</span>
+                <span className="text-xs text-white/80 text-left">
+                  {formatFileSize(message.info?.size)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex gap-4 items-up cursor-pointer"
+              onClick={() => downloadFile(message.mxcUrl, message.content)}
+            >
+              <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
+                <MdFolderZip />
+              </span>
+              <div className="flex flex-col justify-start">
+                <span>{message.content}</span>
+                <span className="text-xs text-white/80 text-left">
+                  {formatFileSize(message.info?.size)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {message.sender !== client?.getUserId() ? (
+        <div className="flex items-center justify-start gap-3">
+          <Avatar className="h-8 w-8 rounded-full overflow-hidden">
+            {message.senderAvatarUrl ? (
+              <AvatarImage
+                src={message.senderAvatarUrl}
+                alt="Profile"
+                className="object-cover w-full h-full bg-black"
+              />
+            ) : (
+              <AvatarFallback
+                className={`h-8 w-8 text-lg flex items-center justify-center rounded-full ${getColor()}`}
+              >
+                {message.senderDisplayName
+                  ? message.senderDisplayName.charAt(0).toUpperCase()
+                  : message.sender?.charAt(1).toUpperCase()}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <span className="text-sm text-white/60">
+            {message.senderDisplayName}
+          </span>
+          <span className="text-xs text-white/60">
+            {moment(message.timeStamp).format("HH:mm")}
+          </span>
+        </div>
+      ) : (
+        <div className="text-xs text-white/60 mt-1">
+          {moment(message.timeStamp).format("HH:mm")}
+        </div>
+      )}
     </div>
   );
 
