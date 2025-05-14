@@ -9,16 +9,14 @@ const EmptyChatContainer = () => {
         loop={animationDefaultOptions.loop}
         autoplay={animationDefaultOptions.autoplay}
         style={{
-          width: "220px",
-          height: "220px",
+          width: "400px",
+          height: "400px",
           filter: "drop-shadow(0 0 20px #9333ea)",
         }}
       />
       <div className="mt-10 text-center flex flex-col gap-5 text-white text-opacity-90 transition-all duration-300">
         <h3 className="text-3xl lg:text-4xl font-semibold poppins-medium">
-          Hi<span className="text-[#c084fc]">!</span> Welcome to
-          <span className="text-[#a855f7]"> Limb </span>Chat App
-          <span className="text-[#c084fc]">.</span>
+          Welcome to<span className="text-[#a855f7]"> Limb </span>
         </h3>
         <p className="text-base lg:text-lg text-[#a1a1aa] max-w-xl">
           Select a contact or group to start messaging ✨

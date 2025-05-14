@@ -23,7 +23,7 @@ function ContactsContainer() {
 
       <div className="my-6 px-4">
         <div className="flex items-center justify-between mb-2">
-          <Title text="Channels" />
+          <Title text="Groups" />
           <CreateChannel />
         </div>
         <div className="max-h-[38vh] overflow-y-auto no-scrollbar">

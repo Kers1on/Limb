@@ -15,8 +15,6 @@ import {
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { animationDefaultOptions } from "@/lib/utils";
-import Lottie from "lottie-react";
 import { useMatrix } from "@/lib/matrixContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -209,16 +207,9 @@ function NewDM() {
 
           {searchedContacts.length <= 0 && (
             <div className="flex-1 md:flex mt-5 md:mt-0 flex-col justify-center items-center duration-1000 transition-all">
-              <Lottie
-                animationData={animationDefaultOptions.animationData}
-                loop={animationDefaultOptions.loop}
-                autoplay={animationDefaultOptions.autoplay}
-                style={{ width: "100px", height: "100px" }}
-              />
               <div className="text-opacity-80 text-white flex flex-col gap-5 items-center mt-5 lg:text-2xl text-xl transition-all duration-300 text-center">
                 <h3 className="poppins-medium">
-                  Hi<span className="text-[#c084fc]">!</span> Search new{" "}
-                  <span className="text-[#9333ea]"> Contacts. </span>
+                  Search new <span className="text-[#9333ea]"> Contacts. </span>
                 </h3>
               </div>
             </div>

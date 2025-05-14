@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import animationData from "@/assets/lottie-json.json";
+import animationData from "@/assets/Animation - 1747241255213.json";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
