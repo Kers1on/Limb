@@ -36,12 +36,7 @@ function MessageContainer() {
   const [showImage, setShowImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageMxcUrl, setImageMxcUrl] = useState<string | null>(null);
-  // const [showVideo, setShowVideo] = useState(false);
-  // const [videoUrl, setVideoUrl] = useState(null);
-  // const [videoMxcUrl, setVideoMxcUrl] = useState<string | null>(null);
-  // const [showAudio, setShowAudio] = useState(false);
-  // const [audioUrl, setAudioUrl] = useState(null);
-  // const [audioMxcUrl, setAudioMxcUrl] = useState<string | null>(null);
+  const [imageName, setImageName] = useState("");
 
   const parseMatrixEvent = (
     event: MatrixEvent,
@@ -50,7 +45,11 @@ function MessageContainer() {
     client: MatrixClient
   ): Message | null => {
     const content = event.getContent();
-    if (content.msgtype === MsgType.Text || content.msgtype === MsgType.File) {
+    if (
+      content.msgtype === MsgType.Text ||
+      content.msgtype === MsgType.File ||
+      content.msgtype === MsgType.Image
+    ) {
       const member = room?.getMember(senderId);
       const displayName = member?.name;
       const avatarUrl = getCustomHttpForMxc(
@@ -162,7 +161,8 @@ function MessageContainer() {
         const content = event.getContent();
         if (
           content.msgtype === MsgType.Text ||
-          content.msgtype === MsgType.File
+          content.msgtype === MsgType.File ||
+          content.msgtype === MsgType.Image
         ) {
           const room = client.getRoom(selectedRoomId);
           const senderId = event.getSender();
@@ -218,14 +218,10 @@ function MessageContainer() {
     if (!mimetype) return false;
     return mimetype.startsWith("image/");
   };
-  // const checkIfFileVideo = (mimetype?: string) => {
-  //   if (!mimetype) return false;
-  //   return mimetype.startsWith("video/");
-  // };
-  // const checkIfFileAudio = (mimetype?: string) => {
-  //   if (!mimetype) return false;
-  //   return mimetype.startsWith("audio/");
-  // };
+  const checkIfFileVideo = (mimetype?: string) => {
+    if (!mimetype) return false;
+    return mimetype.startsWith("video/");
+  };
 
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return "0 B";
@@ -235,7 +231,10 @@ function MessageContainer() {
     return `${value.toFixed(1)} ${sizes[i]}`;
   };
 
-  const downloadFile = async (mxcUrl: string | undefined, name: string) => {
+  const downloadFile = async (
+    mxcUrl: string | undefined,
+    imageName: string
+  ) => {
     if (!mxcUrl || !client) return;
 
     setIsDownloading(true);
@@ -275,7 +274,7 @@ function MessageContainer() {
       const urlBlob = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = urlBlob;
-      a.download = name;
+      a.download = imageName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -332,7 +331,7 @@ function MessageContainer() {
               : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
           } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
         >
-          {checkIfFileImage(message.info?.mimetype) ? (
+          {checkIfFileImage(message.info?.mimetype) && (
             <div
               className="flex gap-4 items-up cursor-pointer"
               onClick={() => {
@@ -345,6 +344,7 @@ function MessageContainer() {
                   )
                 );
                 setImageMxcUrl(message.mxcUrl || "");
+                setImageName(message.content);
               }}
             >
               <img
@@ -364,22 +364,76 @@ function MessageContainer() {
                 </span>
               </div>
             </div>
-          ) : (
-            <div
-              className="flex gap-4 items-up cursor-pointer"
-              onClick={() => downloadFile(message.mxcUrl, message.content)}
-            >
-              <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
-                <MdFolderZip />
-              </span>
-              <div className="flex flex-col justify-start">
-                <span>{message.content}</span>
-                <span className="text-xs text-white/80 text-left">
-                  {formatFileSize(message.info?.size)}
-                </span>
-              </div>
+          )}
+          {checkIfFileVideo(message.info?.mimetype) && (
+            <div className="flex gap-4 items-up cursor-pointer">
+              <video
+                controls
+                src={getCustomHttpForMxc(
+                  client?.baseUrl ?? "",
+                  message.mxcUrl || "",
+                  client?.getAccessToken() || ""
+                )}
+                width={400}
+                className="rounded-md"
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
+          {!checkIfFileImage(message.info?.mimetype) &&
+            !checkIfFileVideo(message.info?.mimetype) && (
+              <div
+                className="flex gap-4 items-up cursor-pointer"
+                onClick={() => downloadFile(message.mxcUrl, message.content)}
+              >
+                <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
+                  <MdFolderZip />
+                </span>
+                <div className="flex flex-col justify-start">
+                  <span>{message.content}</span>
+                  <span className="text-xs text-white/80 text-left">
+                    {formatFileSize(message.info?.size)}
+                  </span>
+                </div>
+              </div>
+            )}
+        </div>
+      )}
+      {message.msgtype === MsgType.Image && (
+        <div
+          className={`${
+            message.sender === client?.getUserId()
+              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
+              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
+          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
+        >
+          <div
+            className="flex gap-4 items-up cursor-pointer"
+            onClick={() => {
+              setShowImage(true);
+              setImageUrl(
+                getCustomHttpForMxc(
+                  client?.baseUrl ?? "",
+                  message.mxcUrl || "",
+                  client?.getAccessToken() || ""
+                )
+              );
+              setImageMxcUrl(message.mxcUrl || "");
+              setImageName(message.content);
+            }}
+          >
+            <img
+              src={getCustomHttpForMxc(
+                client?.baseUrl ?? "",
+                message.mxcUrl || "",
+                client?.getAccessToken() || ""
+              )}
+              alt={message.content}
+              width={400}
+              className="rounded-md"
+            />
+          </div>
         </div>
       )}
       <div className="text-xs text-gray-600">
@@ -413,7 +467,7 @@ function MessageContainer() {
               : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
           } border inline-block p-2 rounded my-1 max-w-[50%] break-words ml-9`}
         >
-          {checkIfFileImage(message.info?.mimetype) ? (
+          {checkIfFileImage(message.info?.mimetype) && (
             <div
               className="flex gap-4 items-up cursor-pointer"
               onClick={() => {
@@ -426,6 +480,7 @@ function MessageContainer() {
                   )
                 );
                 setImageMxcUrl(message.mxcUrl || "");
+                setImageName(message.content);
               }}
             >
               <img
@@ -445,22 +500,40 @@ function MessageContainer() {
                 </span>
               </div>
             </div>
-          ) : (
-            <div
-              className="flex gap-4 items-up cursor-pointer"
-              onClick={() => downloadFile(message.mxcUrl, message.content)}
-            >
-              <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
-                <MdFolderZip />
-              </span>
-              <div className="flex flex-col justify-start">
-                <span>{message.content}</span>
-                <span className="text-xs text-white/80 text-left">
-                  {formatFileSize(message.info?.size)}
-                </span>
-              </div>
+          )}
+          {checkIfFileVideo(message.info?.mimetype) && (
+            <div className="flex gap-4 items-up cursor-pointer">
+              <video
+                controls
+                src={getCustomHttpForMxc(
+                  client?.baseUrl ?? "",
+                  message.mxcUrl || "",
+                  client?.getAccessToken() || ""
+                )}
+                width={200}
+                className="rounded-md"
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
+          {!checkIfFileImage(message.info?.mimetype) &&
+            !checkIfFileVideo(message.info?.mimetype) && (
+              <div
+                className="flex gap-4 items-up cursor-pointer"
+                onClick={() => downloadFile(message.mxcUrl, message.content)}
+              >
+                <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
+                  <MdFolderZip />
+                </span>
+                <div className="flex flex-col justify-start">
+                  <span>{message.content}</span>
+                  <span className="text-xs text-white/80 text-left">
+                    {formatFileSize(message.info?.size)}
+                  </span>
+                </div>
+              </div>
+            )}
         </div>
       )}
       {message.sender !== client?.getUserId() ? (
@@ -520,7 +593,7 @@ function MessageContainer() {
           <div className="flex gap-5 fixed bottom-5">
             <button
               className="bg-black/20 rounded-full p-3 text-2xl hover:bg-black/50 duration-300 transition-all cursor-pointer"
-              onClick={() => downloadFile(imageMxcUrl ?? "", "image.jpg")}
+              onClick={() => downloadFile(imageMxcUrl ?? "", imageName)}
             >
               <IoMdArrowDown />
             </button>

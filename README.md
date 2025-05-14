@@ -64,6 +64,7 @@ after "media_store_path:"
 enable_registration: true
 enable_registration_without_verification: true
 enable_search: true
+max_upload_size: 1073741824
 ```
 
 ### Create First Public Room for indexation
