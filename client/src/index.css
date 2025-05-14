@@ -136,3 +136,26 @@
     scrollbar-width: none;
   }
 }
+
+@keyframes pan {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 1000px 1000px;
+  }
+}
+
+.grid-animated {
+  background-image: radial-gradient(#1e3a8a33 1px, transparent 1px);
+  background-size: 24px 24px;
+  animation: pan 60s linear infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 0.9; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}

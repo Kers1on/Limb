@@ -1,5 +1,3 @@
-import Background from "@/assets/login2.png";
-import Victory from "@/assets/victory.svg";
 import { useState } from "react";
 import { Tabs, TabsList } from "@/components/ui/tabs";
 import { TabsContent, TabsTrigger } from "@radix-ui/react-tabs";
@@ -112,90 +110,99 @@ const Auth = () => {
   };
 
   return (
-    <div className="h-[100vh] w-[100vh] flex items-center justify-center m-auto">
-      <div className="h-[80vh] bg-white border-2 border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2">
-        <div className="flex flex-col gap-10 items-center justify-center">
-          <div className="flex items-center justify-center flex-col">
-            <div className="flex items-center justify-center">
-              <h1 className="text-5xl font-bold md:text-6xl">Welcome</h1>
-              <img src={Victory} alt="Victory emoji" className="h-[100px]" />
-            </div>
-            <p className="font-medium text-center">
-              Fill in the details to get started with the best chat app!
+    <div className="h-screen w-screen relative overflow-hidden bg-gradient-to-br from-[#0d0d0d] via-[#1a1a2e] to-[#000000] flex items-center justify-center font-mono text-white">
+      {/* Grid background animation */}
+      <div className="absolute inset-0 z-0 grid-animated"></div>
+
+      {/* Login Box */}
+      <div className="relative z-10 w-[95vw] md:w-[85vw] lg:w-[70vw] xl:w-[60vw] h-[90vh] bg-[#13131a] bg-opacity-80 border border-[#2a2a40] shadow-[0_0_40px_#2563eb33] rounded-2xl grid xl:grid-cols-2 overflow-hidden backdrop-blur-md">
+        <div className="flex flex-col gap-8 justify-center px-10 py-12">
+          <div className="text-left space-y-2">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#60a5fa]">
+              Limb Access
+            </h1>
+            <p className="text-gray-400 text-sm md:text-base">
+              Enter the decentralized gateway
             </p>
           </div>
-          <div className="flex items-center justify-center w-full">
-            <Tabs className="w-3/4" defaultValue="login">
-              <TabsList className="bg-transparent rounded-none w-full">
-                <TabsTrigger
-                  value="login"
-                  className="data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300 cursor-pointer"
-                >
-                  Login
-                </TabsTrigger>
-                <TabsTrigger
-                  value="signup"
-                  className="data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300 cursor-pointer"
-                >
-                  Register
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent className="flex flex-col gap-5 mt-6" value="login">
-                <Input
-                  placeholder="Username"
-                  type="text"
-                  className="rounded-full p-6"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Button
-                  className="rounded-full p-6 cursor-pointer"
-                  onClick={handleLogin}
-                >
-                  Login
-                </Button>
-              </TabsContent>
-              <TabsContent className="flex flex-col gap-5 mt-6" value="signup">
-                <Input
-                  placeholder="Username"
-                  type="text"
-                  className="rounded-full p-6"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-                <Input
-                  placeholder="Password"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Input
-                  placeholder="ConfirmPassword"
-                  type="password"
-                  className="rounded-full p-6"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                <Button
-                  className="rounded-full p-6 cursor-pointer"
-                  onClick={handleRegistration}
-                >
-                  Register
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </div>
+
+          <Tabs className="w-full" defaultValue="login">
+            <TabsList className="w-full flex border-b border-[#3b3b4f]">
+              <TabsTrigger
+                value="login"
+                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#2563eb] data-[state=active]:border-b-2 data-[state=active]:border-[#2563eb] text-gray-400"
+              >
+                Login
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#2563eb] data-[state=active]:border-b-2 data-[state=active]:border-[#2563eb] text-gray-400"
+              >
+                Register
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent className="flex flex-col gap-4 mt-6" value="login">
+              <Input
+                placeholder="Username"
+                type="text"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <Input
+                placeholder="Password"
+                type="password"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
+                className="bg-[#2563eb] hover:bg-[#1e3a8a] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
+                onClick={handleLogin}
+              >
+                Login
+              </Button>
+            </TabsContent>
+
+            <TabsContent className="flex flex-col gap-4 mt-6" value="signup">
+              <Input
+                placeholder="Username"
+                type="text"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <Input
+                placeholder="Password"
+                type="password"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Input
+                placeholder="Confirm Password"
+                type="password"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <Button
+                className="bg-[#2563eb] hover:bg-[#1e3a8a] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
+                onClick={handleRegistration}
+              >
+                Register
+              </Button>
+            </TabsContent>
+          </Tabs>
         </div>
-        <div className="hidden xl:flex justify-center items-center">
-          <img src={Background} alt="Background Login" className="h-[700px]" />
+
+        <div className="hidden xl:flex items-center justify-center relative">
+          <div className="w-[300px] h-[300px] rounded-full bg-gradient-to-tr from-[#2563eb66] to-transparent animate-pulse-slow blur-3xl" />
+          <div className="absolute text-center text-gray-400 text-sm tracking-widest px-8">
+            <p className="uppercase">Powering the decentralized future</p>
+            <p className="mt-2 text-[#60a5fa]">[matrix] Connected</p>
+          </div>
         </div>
       </div>
     </div>
