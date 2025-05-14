@@ -67,38 +67,10 @@ enable_search: true
 max_upload_size: 1073741824
 ```
 
-## Create root user for creating room for indexation users Matrix (MacOS)
+### Restart docker after changing homeserver.yaml
 
 ```bash
-docker exec -it matrix-synapse register_new_matrix_user \
-    -c /data/homeserver.yaml http://localhost:8008
-```
-
-## Create root user for creating room for indexation users Matrix (Windows PowerShell)
-
-```bash
-docker exec -it matrix-synapse register_new_matrix_user `
-    -c /data/homeserver.yaml http://localhost:8008
-```
-
-### In matrix/createIndexationRoom.js
-
-```tsx
-const accessToken = "example"; // Put here access_token from homeserver.db "access_tokens" table your root user
-```
-
-### Create First Public Room for indexation
-
-```bash
-node createIndexationRoom.js
-```
-
-### After creating room put roomId in client/src/pages/auth/index.tsx in handleRegistration()
-
-```tsx
-client.startClient();
-client.joinRoom("!qwerty:localhost"); // <-- Put here roomId for indexation
-setClient(client);
+docker-compose restart
 ```
 
 ## Client
@@ -119,3 +91,27 @@ VITE_BASE_URL="http://localhost:8008"
 ```bash
 npm run dev
 ```
+
+And register first user.
+
+### In matrix/createIndexationRoom.js after registration
+
+```tsx
+const accessToken = "example"; // Put here your access_token from homeserver.db "access_tokens" table
+```
+
+### Create First Public Room for indexation
+
+```bash
+node createIndexationRoom.js
+```
+
+### After creating room put roomId in client/src/pages/auth/index.tsx in handleRegistration()
+
+```tsx
+client.startClient();
+client.joinRoom("!qwerty:localhost"); // <-- Put here roomId for indexation
+setClient(client);
+```
+
+Now it's ready to use. Have fun!

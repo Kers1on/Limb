@@ -98,7 +98,7 @@ const Auth = () => {
           });
 
           client.startClient();
-          client.joinRoom("!hgmQxZqDMihGSKTHlk:localhost"); // Join a public room for indexation
+          client.joinRoom("!fMgVAkcyBNHXIYcDZI:localhost"); // Join a public room for indexation
           setClient(client);
           navigate("/profile");
         }
