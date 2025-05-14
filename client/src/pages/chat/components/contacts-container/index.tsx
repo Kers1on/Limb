@@ -6,13 +6,13 @@ import GroupChannelList from "@/components/group-channel-list";
 
 function ContactsContainer() {
   return (
-    <div className="relative md:w-[35vw] lg:w-[25vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full">
-      <div className="pt-3">
-        {/* Change the logo after */}
+    <div className="relative md:w-[35vw] lg:w-[25vw] xl:w-[20vw] w-full bg-[#121219] border-r border-[#2c2c36] shadow-[0_0_20px_#9333ea22]">
+      <div className="pt-4">
         <Logo />
       </div>
-      <div className="my-5">
-        <div className="flex items-center justify-between pr-10">
+
+      <div className="my-6 px-4">
+        <div className="flex items-center justify-between mb-2">
           <Title text="Direct Messages" />
           <NewDM />
         </div>
@@ -20,8 +20,9 @@ function ContactsContainer() {
           <ContactList />
         </div>
       </div>
-      <div className="my-5">
-        <div className="flex items-center justify-between pr-10">
+
+      <div className="my-6 px-4">
+        <div className="flex items-center justify-between mb-2">
           <Title text="Channels" />
           <CreateChannel />
         </div>
@@ -29,6 +30,7 @@ function ContactsContainer() {
           <GroupChannelList />
         </div>
       </div>
+
       <ProfileInfo />
     </div>
   );
@@ -38,40 +40,33 @@ export default ContactsContainer;
 
 const Logo = () => {
   return (
-    <div className="flex p-5  justify-start items-center gap-2">
-      <svg
-        id="logo-38"
-        width="78"
-        height="32"
-        viewBox="0 0 78 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {" "}
-        <path
-          d="M55.5 0H77.5L58.5 32H36.5L55.5 0Z"
-          className="ccustom"
-          fill="#8338ec"
-        ></path>{" "}
-        <path
-          d="M35.5 0H51.5L32.5 32H16.5L35.5 0Z"
-          className="ccompli1"
-          fill="#975aed"
-        ></path>{" "}
-        <path
-          d="M19.5 0H31.5L12.5 32H0.5L19.5 0Z"
-          className="ccompli2"
-          fill="#a16ee8"
-        ></path>{" "}
-      </svg>
-      <span className="text-3xl font-semibold ">Limb</span>
+    <div className="flex p-5 justify-start items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#9333ea] to-[#6b21a8] shadow-[0_0_15px_#9333ea88] flex items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M7 8h10M7 12h4m1 8a9 9 0 110-18 9 9 0 010 18z"
+          />
+        </svg>
+      </div>
+      <span className="text-3xl font-semibold tracking-wide text-[#d8b4fe] drop-shadow-[0_0_10px_#a855f766]">
+        Limb
+      </span>
     </div>
   );
 };
 
 const Title = ({ text }: { text: string }) => {
   return (
-    <h6 className="uppercase tracking-widest text-neutral-400 pl-10 font-light text-opacity-90 text-sm">
+    <h6 className="uppercase tracking-widest text-[#9f87d0] text-sm font-light">
       {text}
     </h6>
   );

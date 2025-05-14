@@ -8,7 +8,6 @@ import {
 import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { useMatrix } from "@/lib/matrixContext";
 import { clearSession } from "@/lib/storageSession";
-import { getColor } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { FiEdit2 } from "react-icons/fi";
 import { IoPowerSharp } from "react-icons/io5";
@@ -74,10 +73,10 @@ function ProfileInfo() {
   };
 
   return (
-    <div className="absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]">
-      <div className="flex gap-3 items-center justify-center">
+    <div className="absolute bottom-0 h-16 flex items-center justify-between px-6 w-full bg-[#1a1a22]/80 backdrop-blur-md border-t border-[#2f2f38] shadow-[0_-2px_10px_#6b21a820]">
+      <div className="flex gap-3 items-center">
         <div className="w-12 h-12 relative">
-          <Avatar className="h-12 w-12 rounded-full overflow-hidden">
+          <Avatar className="h-12 w-12 rounded-full overflow-hidden shadow-[0_0_10px_#9333ea66]">
             {image ? (
               <AvatarImage
                 src={image}
@@ -86,7 +85,7 @@ function ProfileInfo() {
               />
             ) : (
               <div
-                className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                className={`h-12 w-12 text-lg border border-[#9333ea] text-[#d8b4fe] flex items-center justify-center rounded-full bg-[#121219]`}
               >
                 {displayName
                   ? displayName.charAt(0).toUpperCase()
@@ -95,35 +94,39 @@ function ProfileInfo() {
             )}
           </Avatar>
         </div>
-        <div>{displayName ? displayName : userId?.split(":")[0]}</div>
+        <div className="text-sm text-[#e0d4ff] font-medium">
+          {displayName ? displayName : userId?.split(":")[0]}
+        </div>
       </div>
+
       <div className="flex gap-5">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <FiEdit2
-                className="text-purple-500 text-xl font-medium cursor-pointer"
+                className="text-[#c084fc] hover:text-[#e9d5ff] text-xl cursor-pointer transition-colors duration-200"
                 onClick={() => {
                   navigate("/profile");
                 }}
               />
             </TooltipTrigger>
-            <TooltipContent className="bg-[#1c1b1e] border-none text-white">
+            <TooltipContent className="bg-[#1c1b1e] border-none text-white text-xs">
               Edit Profile
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <IoPowerSharp
-                className="text-red-500 text-xl font-medium cursor-pointer"
+                className="text-red-500 hover:text-red-400 text-xl cursor-pointer transition-colors duration-200"
                 onClick={() => {
                   logOut();
                 }}
               />
             </TooltipTrigger>
-            <TooltipContent className="bg-[#1c1b1e] border-none text-white">
+            <TooltipContent className="bg-[#1c1b1e] border-none text-white text-xs">
               Logout
             </TooltipContent>
           </Tooltip>

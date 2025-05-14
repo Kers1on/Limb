@@ -50,18 +50,24 @@ const GroupChannelList = () => {
       {groupRooms.map((room) => (
         <div
           key={room.roomId}
-          className={`pl-10 py-2 transition-all duration-300 cursor-pointer ${
+          className={`pl-1 py-2 transition-all duration-300 cursor-pointer rounded-lg ${
             selectedRoomId === room.roomId
-              ? "bg-[#8417ff] hover:bg-[#8417ff]"
-              : "hover:bg-[#f1f1f111]"
+              ? "bg-[#6b21a8] hover:bg-[#6b21a8] border-l-4 border-[#c084fc]"
+              : "hover:bg-[#2a2b33] hover:border-l-4 hover:border-[#9333ea]"
           }`}
           onClick={() => handleClick(room.roomId)}
         >
-          <div className="flex gap-5 items-center justify-start text-neutral-300">
-            <div className="h-10 w-10 rounded-full overflow-hidden bg-[#ffffff22] flex items-center justify-center">
+          <div className="flex gap-5 items-center justify-start text-[#e0d4ff]">
+            <div
+              className={`h-10 w-10 rounded-full overflow-hidden flex items-center justify-center text-xl font-bold ${
+                selectedRoomId === room.roomId
+                  ? "bg-[#ffffff22] border-2 border-[#6b21a8]"
+                  : "bg-[#1e1f29] text-[#c084fc]"
+              }`}
+            >
               #
             </div>
-            <span>{room.name}</span>
+            <span className="text-sm">{room.name}</span>
           </div>
         </div>
       ))}

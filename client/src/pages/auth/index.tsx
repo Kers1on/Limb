@@ -115,10 +115,10 @@ const Auth = () => {
       <div className="absolute inset-0 z-0 grid-animated"></div>
 
       {/* Login Box */}
-      <div className="relative z-10 w-[95vw] md:w-[85vw] lg:w-[70vw] xl:w-[60vw] h-[90vh] bg-[#13131a] bg-opacity-80 border border-[#2a2a40] shadow-[0_0_40px_#2563eb33] rounded-2xl grid xl:grid-cols-2 overflow-hidden backdrop-blur-md">
+      <div className="relative z-10 w-[95vw] md:w-[85vw] lg:w-[70vw] xl:w-[60vw] h-[90vh] bg-[#13131a] bg-opacity-80 border border-[#2a2a40] shadow-[0_0_40px_#9333ea33] rounded-2xl grid xl:grid-cols-2 overflow-hidden backdrop-blur-md">
         <div className="flex flex-col gap-8 justify-center px-10 py-12">
           <div className="text-left space-y-2">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#60a5fa]">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#a855f7]">
               Limb Access
             </h1>
             <p className="text-gray-400 text-sm md:text-base">
@@ -130,13 +130,13 @@ const Auth = () => {
             <TabsList className="w-full flex border-b border-[#3b3b4f]">
               <TabsTrigger
                 value="login"
-                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#2563eb] data-[state=active]:border-b-2 data-[state=active]:border-[#2563eb] text-gray-400"
+                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#9333ea] data-[state=active]:border-b-2 data-[state=active]:border-[#9333ea] text-gray-400"
               >
                 Login
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#2563eb] data-[state=active]:border-b-2 data-[state=active]:border-[#2563eb] text-gray-400"
+                className="w-full text-sm p-3 tracking-wide uppercase data-[state=active]:text-[#9333ea] data-[state=active]:border-b-2 data-[state=active]:border-[#9333ea] text-gray-400"
               >
                 Register
               </TabsTrigger>
@@ -146,19 +146,19 @@ const Auth = () => {
               <Input
                 placeholder="Username"
                 type="text"
-                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
               <Input
                 placeholder="Password"
                 type="password"
-                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <Button
-                className="bg-[#2563eb] hover:bg-[#1e3a8a] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
+                className="bg-[#9333ea] hover:bg-[#6b21a8] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
                 onClick={handleLogin}
               >
                 Login
@@ -169,26 +169,26 @@ const Auth = () => {
               <Input
                 placeholder="Username"
                 type="text"
-                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
               <Input
                 placeholder="Password"
                 type="password"
-                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <Input
                 placeholder="Confirm Password"
                 type="password"
-                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+                className="bg-[#1e1e2e] border border-[#383856] text-white p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <Button
-                className="bg-[#2563eb] hover:bg-[#1e3a8a] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
+                className="bg-[#9333ea] hover:bg-[#6b21a8] transition-all p-4 rounded-md text-white tracking-wide cursor-pointer"
                 onClick={handleRegistration}
               >
                 Register
@@ -198,10 +198,10 @@ const Auth = () => {
         </div>
 
         <div className="hidden xl:flex items-center justify-center relative">
-          <div className="w-[300px] h-[300px] rounded-full bg-gradient-to-tr from-[#2563eb66] to-transparent animate-pulse-slow blur-3xl" />
+          <div className="w-[300px] h-[300px] rounded-full bg-gradient-to-tr from-[#9333ea66] to-transparent animate-pulse-slow blur-3xl" />
           <div className="absolute text-center text-gray-400 text-sm tracking-widest px-8">
             <p className="uppercase">Powering the decentralized future</p>
-            <p className="mt-2 text-[#60a5fa]">[matrix] Connected</p>
+            <p className="mt-2 text-[#a855f7]">[matrix] Connected</p>
           </div>
         </div>
       </div>

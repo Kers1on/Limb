@@ -4,7 +4,6 @@ import { IoArrowBack } from "react-icons/io5";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { getColor } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -128,86 +127,86 @@ const Profile = () => {
   };
 
   return (
-    <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center flex-col gap-10">
-      <div className="flex flex-col gap-10 w-[80vw] md:w-max">
+    <div className="bg-[#0d0d0d] h-screen w-screen flex items-center justify-center">
+      <div className="bg-[#1b1c24] border border-[#9333ea] rounded-2xl shadow-[0_0_30px_#9333ea66] p-10 w-[90vw] max-w-4xl flex flex-col gap-10">
         <div>
           <IoArrowBack
-            className="text-4xl lg:text-6xl text-white/90 cursor-pointer"
+            className="text-4xl lg:text-5xl text-[#a78bfa] cursor-pointer transition-all hover:text-[#c084fc]"
             onClick={() => navigate("/chat")}
           />
         </div>
-        <div className="grid grid-cols-2">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Аватар */}
           <div
-            className="h-full w-32 md:w-48 md:h-48 relative flex items-center justify-center"
+            className="w-full flex items-center justify-center"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
-            <Avatar className="h-32 w-32 md:w-48 md:h-48 rounded-full overflow-hidden">
-              {image ? (
-                <AvatarImage
-                  src={image}
-                  alt="Profile"
-                  className="object-cover w-full h-full bg-black"
-                />
-              ) : (
+            <div className="relative w-32 h-32 md:w-48 md:h-48">
+              <Avatar className="w-full h-full rounded-full overflow-hidden border-[2px] border-[#9333ea] shadow-[0_0_15px_#9333ea66]">
+                {image ? (
+                  <AvatarImage
+                    src={image}
+                    alt="Profile"
+                    className="object-cover w-full h-full bg-black"
+                  />
+                ) : (
+                  <div
+                    className={`w-full h-full text-5xl flex items-center justify-center rounded-full bg-[#121219] text-[#d8b4fe]`}
+                  >
+                    {displayName
+                      ? displayName.charAt(0).toUpperCase()
+                      : userId?.charAt(1).toUpperCase()}
+                  </div>
+                )}
+              </Avatar>
+              {hovered && (
                 <div
-                  className={`h-32 w-32 md:w-48 md:h-48 text-5xl border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer"
+                  onClick={image ? handleDeleteImage : handleFileInputClick}
                 >
-                  {displayName
-                    ? displayName.charAt(0).toUpperCase()
-                    : userId?.charAt(1).toUpperCase()}
+                  {image ? (
+                    <FaTrash className="text-white text-3xl" />
+                  ) : (
+                    <FaPlus className="text-white text-3xl" />
+                  )}
                 </div>
               )}
-            </Avatar>
-            {hovered && (
-              <div
-                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full cursor-pointer"
-                onClick={image ? handleDeleteImage : handleFileInputClick}
-              >
-                {image ? (
-                  <FaTrash className="text-white text-3xl cursor-pointer" />
-                ) : (
-                  <FaPlus className="text-white text-3xl cursor-pointer" />
-                )}
-              </div>
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleImageChange}
-              name="profile-image"
-              accept=".png, .jpg, .jpeg, .svg, .webp"
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleImageChange}
+                name="profile-image"
+                accept=".png, .jpg, .jpeg, .svg, .webp"
+              />
+            </div>
+          </div>
+
+          {/* Інпути + кнопка */}
+          <div className="flex flex-col gap-5 justify-center text-white">
+            <Input
+              placeholder="User ID"
+              type="text"
+              disabled
+              value={userId ? userId : ""}
+              className="rounded-lg p-6 bg-[#1e1e2e] border border-[#5b21b6] text-white focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
             />
+            <Input
+              placeholder="Display Name"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="rounded-lg p-6 bg-[#1e1e2e] border border-[#5b21b6] text-white focus:outline-none focus:ring-2 focus:ring-[#9333ea]"
+            />
+            <Button
+              className="mt-4 h-14 bg-[#9333ea] hover:bg-[#6b21a8] transition-all duration-300 rounded-lg shadow-[0_0_15px_#9333ea77] cursor-pointer"
+              onClick={saveChanges}
+            >
+              Save Changes
+            </Button>
           </div>
-          <div className="flex min-w-32 md:min-w-64 flex-col gap-5 text-white items-center justify-center">
-            <div className="w-full">
-              <Input
-                placeholder="User ID"
-                type="text"
-                disabled
-                value={userId ? userId : ""}
-                className="rounded-lg p-6 bg-[#2c2e3b] border-none"
-              />
-            </div>
-            <div className="w-full">
-              <Input
-                placeholder="Display Name"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="rounded-lg p-6 bg-[#2c2e3b] border-none"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="w-full">
-          <Button
-            className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300 cursor-pointer"
-            onClick={saveChanges}
-          >
-            Save Changes
-          </Button>
         </div>
       </div>
     </div>

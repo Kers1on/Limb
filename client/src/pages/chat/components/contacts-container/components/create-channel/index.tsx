@@ -23,7 +23,7 @@ import MultipleSelector from "@/components/ui/multipleselect";
 import { getColor } from "@/lib/utils";
 
 function CreateChannel() {
-  const { client, setSelectedRoomId, isClientReady } = useMatrix();
+  const { client, isClientReady } = useMatrix();
   const [newChannelModal, setNewChannelModal] = useState(false);
   const [allContacts, setAllContacts] = useState<
     { userId: string; displayName: string; avatarUrl: string | null }[]
@@ -111,7 +111,6 @@ function CreateChannel() {
       const roomId = response.room_id;
 
       if (roomId) {
-        // setSelectedRoomId(roomId);
         setNewChannelModal(false);
         setChannelName("");
         setSelectedContacts([]);
@@ -122,84 +121,91 @@ function CreateChannel() {
   };
 
   return (
-    <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <FaPlus
-              className="text-neutral-400 font-light text-opacity-90 text-start hover:text-neutral-100 cursor-pointer transition-all duration-300"
-              onClick={() => setNewChannelModal(true)}
-            />
-          </TooltipTrigger>
-          <TooltipContent className="bg-[#1c1b1e] border-none mb-2 p-3 text-white">
-            Create New Channel
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      <Dialog open={newChannelModal} onOpenChange={setNewChannelModal}>
-        <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>
-              Please fill up the details for new channel
-            </DialogTitle>
-            <DialogDescription></DialogDescription>
-          </DialogHeader>
-          <div>
-            <Input
-              placeholder="Channel Name"
-              className="rounded-lg p-6 bg-[#2c2e3b] border-none"
-              onChange={(e) => setChannelName(e.target.value)}
-              value={channelName}
-            />
-          </div>
-          <div>
-            <MultipleSelector
-              className="rounded-lg bg-[#2c2e3b] border-none py-2 text-white"
-              defaultOptions={allContacts.map((contact) => ({
-                value: contact.userId,
-                label: contact.displayName,
-                avatarUrl: contact.avatarUrl || "",
-                color: getColor(),
-              }))}
-              placeholder="Search Contacts"
-              value={selectedContacts.map((contact) => ({
-                value: contact.userId,
-                label: contact.displayName,
-                avatarUrl: contact.avatarUrl || "",
-                color: getColor(),
-              }))}
-              onChange={(options) =>
-                setSelectedContacts(
-                  options.map((option) => ({
-                    userId: option.value,
-                    displayName: option.label,
-                    avatarUrl:
-                      typeof option.avatarUrl === "string"
-                        ? option.avatarUrl
-                        : null,
-                    color: option.color,
-                  }))
-                )
-              }
-              emptyIndicator={
-                <p className="text-center text-lg leading-10 text-gray-600">
-                  No results found.
-                </p>
-              }
-            />
-          </div>
-          <div>
-            <Button
-              className="w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300 cursor-pointer"
-              onClick={createChannel}
-            >
-              Create Channel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
+  <>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <FaPlus
+            className="text-neutral-400 font-light text-opacity-90 text-start hover:text-[#c084fc] cursor-pointer transition-all duration-300"
+            onClick={() => setNewChannelModal(true)}
+          />
+        </TooltipTrigger>
+        <TooltipContent className="bg-[#1c1b1e] border-none mb-2 p-3 text-white">
+          Create New Channel
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+
+    <Dialog open={newChannelModal} onOpenChange={setNewChannelModal}>
+      <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col rounded-lg shadow-[0_4px_15px_#9333ea66]">
+        <DialogHeader>
+          <DialogTitle className="text-[#c084fc]">
+            Please fill up the details for new channel
+          </DialogTitle>
+          <DialogDescription className="text-sm text-neutral-400">
+            Enter the name and select contacts for the new channel.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div>
+          <Input
+            placeholder="Channel Name"
+            className="rounded-lg p-6 bg-[#2c2e3b] border-none focus:outline-none focus:ring-2 focus:ring-[#6b21a8] text-[#e0d4ff]"
+            onChange={(e) => setChannelName(e.target.value)}
+            value={channelName}
+          />
+        </div>
+
+        <div className="mt-4">
+          <MultipleSelector
+            className="rounded-lg bg-[#2c2e3b] border-none py-2 text-white"
+            defaultOptions={allContacts.map((contact) => ({
+              value: contact.userId,
+              label: contact.displayName,
+              avatarUrl: contact.avatarUrl || "",
+              color: getColor(),
+            }))}
+            placeholder="Search Contacts"
+            value={selectedContacts.map((contact) => ({
+              value: contact.userId,
+              label: contact.displayName,
+              avatarUrl: contact.avatarUrl || "",
+              color: getColor(),
+            }))}
+            onChange={(options) =>
+              setSelectedContacts(
+                options.map((option) => ({
+                  userId: option.value,
+                  displayName: option.label,
+                  avatarUrl:
+                    typeof option.avatarUrl === "string"
+                      ? option.avatarUrl
+                      : null,
+                  color: option.color,
+                }))
+              )
+            }
+            emptyIndicator={
+              <p className="text-center text-lg leading-10 text-gray-600">
+                No results found.
+              </p>
+            }
+          />
+        </div>
+
+        <div className="mt-4">
+          <Button
+            className="w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300 text-white rounded-lg py-3"
+            onClick={createChannel}
+          >
+            Create Channel
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
+);
+
 }
 
 export default CreateChannel;

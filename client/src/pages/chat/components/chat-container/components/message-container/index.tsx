@@ -292,11 +292,14 @@ function MessageContainer() {
       const messageDate = moment(message.timeStamp).format("DD.MM.YYYY");
       const showDate = messageDate !== lastDate;
       lastDate = messageDate;
+
       return (
         <div key={index}>
           {showDate && (
-            <div className="text-center text-gray-500 my-2">
-              {moment(message.timeStamp).format("DD.MM.YYYY")}
+            <div className="text-center my-6">
+              <span className="px-4 py-1 text-sm text-purple-300 bg-[#2a2b33] rounded-full">
+                {messageDate}
+              </span>
             </div>
           )}
           {isDirectRoom && renderDMMessages(message)}
@@ -306,155 +309,149 @@ function MessageContainer() {
     });
   };
 
-  const renderDMMessages = (message: Message) => (
-    <div
-      className={`${
-        message.sender !== client?.getUserId() ? "text-left" : "text-right"
-      }`}
-    >
-      {message.msgtype === MsgType.Text && (
-        <div
-          className={`${
-            message.sender === client?.getUserId()
-              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
-        >
-          {message.content}
-        </div>
-      )}
-      {message.msgtype === MsgType.File && (
-        <div
-          className={`${
-            message.sender === client?.getUserId()
-              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
-        >
-          {checkIfFileImage(message.info?.mimetype) && (
-            <div
-              className="flex gap-4 items-up cursor-pointer"
-              onClick={() => {
-                setShowImage(true);
-                setImageUrl(
-                  getCustomHttpForMxc(
+  const renderDMMessages = (message: Message) => {
+    const isOwnMessage = message.sender === client?.getUserId();
+    const bubbleStyle = isOwnMessage
+      ? "bg-[#8417ff]/10 text-[#d9bfff] border-[#8417ff]/40"
+      : "bg-[#1e1f29]/50 text-white/80 border-white/10";
+
+    return (
+      <div className={`${isOwnMessage ? "text-right" : "text-left"} my-2`}>
+        {message.msgtype === MsgType.Text && (
+          <div
+            className={`border inline-block px-4 py-2 rounded-xl max-w-[65%] break-words backdrop-blur-sm transition-all duration-200 ${bubbleStyle}`}
+          >
+            {message.content}
+          </div>
+        )}
+
+        {message.msgtype === MsgType.File && (
+          <div
+            className={`border inline-block px-4 py-2 rounded-xl max-w-[65%] break-words backdrop-blur-sm transition-all duration-200 ${bubbleStyle}`}
+          >
+            {checkIfFileImage(message.info?.mimetype) && (
+              <div
+                className="flex gap-4 items-start cursor-pointer hover:brightness-110"
+                onClick={() => {
+                  setShowImage(true);
+                  setImageUrl(
+                    getCustomHttpForMxc(
+                      client?.baseUrl ?? "",
+                      message.mxcUrl || "",
+                      client?.getAccessToken() || ""
+                    )
+                  );
+                  setImageMxcUrl(message.mxcUrl || "");
+                  setImageName(message.content);
+                }}
+              >
+                <img
+                  src={getCustomHttpForMxc(
                     client?.baseUrl ?? "",
                     message.mxcUrl || "",
                     client?.getAccessToken() || ""
-                  )
-                );
-                setImageMxcUrl(message.mxcUrl || "");
-                setImageName(message.content);
-              }}
-            >
-              <img
-                src={getCustomHttpForMxc(
-                  client?.baseUrl ?? "",
-                  message.mxcUrl || "",
-                  client?.getAccessToken() || ""
-                )}
-                alt={message.content}
-                width={75}
-                className="rounded-md"
-              />
-              <div className="flex flex-col justify-start">
-                <span>{message.content}</span>
-                <span className="text-xs text-white/80 text-left">
-                  {formatFileSize(message.info?.size)}
-                </span>
-              </div>
-            </div>
-          )}
-          {checkIfFileVideo(message.info?.mimetype) && (
-            <div className="flex gap-4 items-up cursor-pointer">
-              <video
-                controls
-                src={getCustomHttpForMxc(
-                  client?.baseUrl ?? "",
-                  message.mxcUrl || "",
-                  client?.getAccessToken() || ""
-                )}
-                width={400}
-                className="rounded-md"
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
-          {!checkIfFileImage(message.info?.mimetype) &&
-            !checkIfFileVideo(message.info?.mimetype) && (
-              <div
-                className="flex gap-4 items-up cursor-pointer"
-                onClick={() => downloadFile(message.mxcUrl, message.content)}
-              >
-                <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
-                  <MdFolderZip />
-                </span>
+                  )}
+                  alt={message.content}
+                  width={75}
+                  className="rounded-md shadow-lg"
+                />
                 <div className="flex flex-col justify-start">
                   <span>{message.content}</span>
-                  <span className="text-xs text-white/80 text-left">
+                  <span className="text-xs text-white/60">
                     {formatFileSize(message.info?.size)}
                   </span>
                 </div>
               </div>
             )}
-        </div>
-      )}
-      {message.msgtype === MsgType.Image && (
-        <div
-          className={`${
-            message.sender === client?.getUserId()
-              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-2 rounded my-1 max-w-[50%] break-words`}
-        >
+
+            {checkIfFileVideo(message.info?.mimetype) && (
+              <div className="flex gap-4 items-start cursor-pointer">
+                <video
+                  controls
+                  src={getCustomHttpForMxc(
+                    client?.baseUrl ?? "",
+                    message.mxcUrl || "",
+                    client?.getAccessToken() || ""
+                  )}
+                  width={300}
+                  className="rounded-md shadow-md"
+                />
+              </div>
+            )}
+
+            {!checkIfFileImage(message.info?.mimetype) &&
+              !checkIfFileVideo(message.info?.mimetype) && (
+                <div
+                  className="flex gap-4 items-start cursor-pointer hover:brightness-110"
+                  onClick={() => downloadFile(message.mxcUrl, message.content)}
+                >
+                  <span className="text-3xl text-[#d1d1d1] bg-black/30 rounded-full p-3">
+                    <MdFolderZip />
+                  </span>
+                  <div className="flex flex-col justify-start">
+                    <span>{message.content}</span>
+                    <span className="text-xs text-white/60">
+                      {formatFileSize(message.info?.size)}
+                    </span>
+                  </div>
+                </div>
+              )}
+          </div>
+        )}
+
+        {message.msgtype === MsgType.Image && (
           <div
-            className="flex gap-4 items-up cursor-pointer"
-            onClick={() => {
-              setShowImage(true);
-              setImageUrl(
-                getCustomHttpForMxc(
+            className={`border inline-block px-4 py-2 rounded-xl max-w-[65%] break-words backdrop-blur-sm transition-all duration-200 ${bubbleStyle}`}
+          >
+            <div
+              className="flex gap-4 items-start cursor-pointer hover:brightness-110"
+              onClick={() => {
+                setShowImage(true);
+                setImageUrl(
+                  getCustomHttpForMxc(
+                    client?.baseUrl ?? "",
+                    message.mxcUrl || "",
+                    client?.getAccessToken() || ""
+                  )
+                );
+                setImageMxcUrl(message.mxcUrl || "");
+                setImageName(message.content);
+              }}
+            >
+              <img
+                src={getCustomHttpForMxc(
                   client?.baseUrl ?? "",
                   message.mxcUrl || "",
                   client?.getAccessToken() || ""
-                )
-              );
-              setImageMxcUrl(message.mxcUrl || "");
-              setImageName(message.content);
-            }}
-          >
-            <img
-              src={getCustomHttpForMxc(
-                client?.baseUrl ?? "",
-                message.mxcUrl || "",
-                client?.getAccessToken() || ""
-              )}
-              alt={message.content}
-              width={400}
-              className="rounded-md"
-            />
+                )}
+                alt={message.content}
+                width={300}
+                className="rounded-md shadow-lg"
+              />
+            </div>
           </div>
+        )}
+
+        <div className="text-xs mt-1 text-gray-500 italic px-2">
+          {moment(message.timeStamp).format("HH:mm")}
         </div>
-      )}
-      <div className="text-xs text-gray-600">
-        {moment(message.timeStamp).format("HH:mm")}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderChannelMessages = (message: Message) => (
     <div
       className={`${
         message.sender !== client?.getUserId() ? "text-left" : "text-right"
-      }`}
+      } my-2`}
     >
       {message.msgtype === MsgType.Text && (
         <div
           className={`${
             message.sender === client?.getUserId()
-              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-2 rounded my-1 max-w-[50%] break-words ml-9`}
+              ? "bg-[#8417ff]/10 text-[#d9bfff] border-[#8417ff]/40"
+              : "bg-[#1e1f29]/50 text-white/80 border-white/10"
+          } border inline-block p-2 rounded-xl max-w-[65%] break-words backdrop-blur-sm transition-all duration-200 ml-9`}
         >
           {message.content}
         </div>
@@ -463,13 +460,13 @@ function MessageContainer() {
         <div
           className={`${
             message.sender === client?.getUserId()
-              ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8417ff]/50"
-              : "bg-[#2a2b33]/5 text-white/80 border-[#ffffff]/20"
-          } border inline-block p-2 rounded my-1 max-w-[50%] break-words ml-9`}
+              ? "bg-[#8417ff]/10 text-[#d9bfff] border-[#8417ff]/40"
+              : "bg-[#1e1f29]/50 text-white/80 border-white/10"
+          } border inline-block p-2 rounded-xl max-w-[65%] break-words backdrop-blur-sm transition-all duration-200 ml-9`}
         >
           {checkIfFileImage(message.info?.mimetype) && (
             <div
-              className="flex gap-4 items-up cursor-pointer"
+              className="flex gap-4 items-start cursor-pointer hover:brightness-110"
               onClick={() => {
                 setShowImage(true);
                 setImageUrl(
@@ -495,14 +492,15 @@ function MessageContainer() {
               />
               <div className="flex flex-col justify-start">
                 <span>{message.content}</span>
-                <span className="text-xs text-white/80 text-left">
+                <span className="text-xs text-white/60">
                   {formatFileSize(message.info?.size)}
                 </span>
               </div>
             </div>
           )}
+
           {checkIfFileVideo(message.info?.mimetype) && (
-            <div className="flex gap-4 items-up cursor-pointer">
+            <div className="flex gap-4 items-start cursor-pointer">
               <video
                 controls
                 src={getCustomHttpForMxc(
@@ -510,17 +508,18 @@ function MessageContainer() {
                   message.mxcUrl || "",
                   client?.getAccessToken() || ""
                 )}
-                width={200}
+                width={300}
                 className="rounded-md"
               >
                 Your browser does not support the video tag.
               </video>
             </div>
           )}
+
           {!checkIfFileImage(message.info?.mimetype) &&
             !checkIfFileVideo(message.info?.mimetype) && (
               <div
-                className="flex gap-4 items-up cursor-pointer"
+                className="flex gap-4 items-start cursor-pointer"
                 onClick={() => downloadFile(message.mxcUrl, message.content)}
               >
                 <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3">
@@ -528,7 +527,7 @@ function MessageContainer() {
                 </span>
                 <div className="flex flex-col justify-start">
                   <span>{message.content}</span>
-                  <span className="text-xs text-white/80 text-left">
+                  <span className="text-xs text-white/60">
                     {formatFileSize(message.info?.size)}
                   </span>
                 </div>
@@ -573,13 +572,14 @@ function MessageContainer() {
   return (
     <div
       ref={scrollContainerRef}
-      className="flex-1 overflow-y-auto no-scrollbar p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full"
+      className="flex-1 overflow-y-auto no-scrollbar p-4 px-6 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full transition-all duration-300"
     >
       {renderMessages()}
       <div ref={scrollRef} />
+
       {showImage && (
         <div
-          className="fixed top-0 left-0 w-full h-full backdrop-blur-lg flex flex-col items-center justify-center z-[50]"
+          className="fixed top-0 left-0 w-full h-full bg-[#1c1d25dd] backdrop-blur-lg flex flex-col items-center justify-center z-[60] transition-all duration-300"
           onClick={() => {
             setShowImage(false);
             setImageUrl(null);
@@ -588,12 +588,15 @@ function MessageContainer() {
           <img
             src={imageUrl ?? ""}
             alt="Preview"
-            className="max-h-[100vh] max-w-[100vh] bg-cover"
+            className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-[0_0_30px_#9333ea55] transition-all duration-300"
           />
-          <div className="flex gap-5 fixed bottom-5">
+          <div className="flex gap-5 fixed bottom-6">
             <button
-              className="bg-black/20 rounded-full p-3 text-2xl hover:bg-black/50 duration-300 transition-all cursor-pointer"
-              onClick={() => downloadFile(imageMxcUrl ?? "", imageName)}
+              className="bg-[#9333ea22] hover:bg-[#9333ea44] text-white rounded-full p-3 text-2xl transition-all duration-300 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadFile(imageMxcUrl ?? "", imageName);
+              }}
             >
               <IoMdArrowDown />
             </button>

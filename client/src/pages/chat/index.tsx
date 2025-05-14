@@ -13,19 +13,28 @@ const Chat = () => {
   } = useMatrix();
 
   return (
-    <div className="flex h-[100vh] text-white overflow-hidden">
-      {isUploading && (
-        <div className="h-full w-full fixed top-0 z-10 left-0 bg-black/80 flex items-center justify-center flex-col gap-5 backdrop-blur-lg">
-          <h5 className="text-5xl animate-pulse">Uploading File</h5>
-          {fileUploadProgress}%
+    <div className="flex h-screen text-white overflow-hidden bg-[#0d0d0d]">
+      {(isUploading || isDownloading) && (
+        <div className="h-full w-full fixed top-0 left-0 z-10 bg-[#0d0d0d]/90 backdrop-blur-md flex items-center justify-center flex-col gap-6">
+          <h5 className="text-4xl lg:text-5xl text-[#9333ea] animate-pulse drop-shadow-[0_0_10px_#9333ea88]">
+            {isUploading ? "Uploading File" : "Downloading File"}
+          </h5>
+          <div className="w-48 h-4 bg-[#1b1c24] rounded-full border border-[#9333ea] overflow-hidden">
+            <div
+              className="h-full bg-[#9333ea] transition-all duration-300"
+              style={{
+                width: `${
+                  isUploading ? fileUploadProgress : fileDownloadProgress
+                }%`,
+              }}
+            ></div>
+          </div>
+          <span className="text-[#c084fc] text-lg font-mono">
+            {isUploading ? fileUploadProgress : fileDownloadProgress}%
+          </span>
         </div>
       )}
-      {isDownloading && (
-        <div className="h-full w-full fixed top-0 z-10 left-0 bg-black/80 flex items-center justify-center flex-col gap-5 backdrop-blur-lg">
-          <h5 className="text-5xl animate-pulse">Downloading File</h5>
-          {fileDownloadProgress}%
-        </div>
-      )}
+
       <ContactsContainer />
       {selectedRoomId ? <ChatContainer /> : <EmptyChatContainer />}
     </div>

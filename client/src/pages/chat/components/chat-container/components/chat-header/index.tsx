@@ -1,7 +1,6 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { useMatrix } from "@/lib/matrixContext";
-import { getColor } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
 
@@ -70,9 +69,9 @@ const ChatHeader = () => {
   }, [client, selectedRoomId, isClientReady]);
 
   return (
-    <div className="h-[10vh] border-b-2 border-[#2f303b] flex items-center justify-between px-20">
-      <div className="flex gap-5 items-center w-full justify-between">
-        <div className="flex gap-3 items-center justify-center">
+    <div className="h-[10vh] border-b border-[#2a2b33] bg-[#1e1f2a] px-6 flex items-center justify-between transition-all duration-300">
+      <div className="flex gap-4 items-center w-full justify-between">
+        <div className="flex gap-3 items-center">
           <div className="w-12 h-12 relative">
             {!member?.isGroup ? (
               <Avatar className="h-12 w-12 rounded-full overflow-hidden">
@@ -84,7 +83,7 @@ const ChatHeader = () => {
                   />
                 ) : (
                   <div
-                    className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                    className={`h-12 w-12 text-lg border border-[#9333ea] flex items-center justify-center rounded-full text-[#d8b4fe] bg-[#121219]`}
                   >
                     {member?.displayName
                       ? member.displayName.charAt(0).toUpperCase()
@@ -93,20 +92,20 @@ const ChatHeader = () => {
                 )}
               </Avatar>
             ) : (
-              <div className="bg-[#ffffff22] h-10 w-10 flex items-center justify-center rounded-full">
+              <div className="bg-[#ffffff22] border border-[#9333ea55] h-12 w-12 flex items-center justify-center rounded-full text-purple-300 text-xl">
                 #
               </div>
             )}
           </div>
-          <div>
+          <div className="text-white text-opacity-90 poppins-medium">
             {member?.displayName
               ? member.displayName
               : member?.userId?.split(":")[0].slice(1)}
           </div>
         </div>
-        <div className="flex items-center justify-center gap-5">
+        <div className="flex items-center gap-4">
           <button
-            className="text-neutral-500 focus:border-none focus:outline-non focus:text-white duration-300 transition-all cursor-pointer"
+            className="text-neutral-400 hover:text-white transition-colors duration-300 cursor-pointer"
             onClick={() => setSelectedRoomId(null)}
           >
             <RiCloseFill className="text-3xl" />

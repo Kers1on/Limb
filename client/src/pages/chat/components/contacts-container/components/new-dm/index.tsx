@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { animationDefaultOptions, getColor } from "@/lib/utils";
+import { animationDefaultOptions } from "@/lib/utils";
 import Lottie from "lottie-react";
 import { useMatrix } from "@/lib/matrixContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -121,8 +121,6 @@ function NewDM() {
         updatedDirectMap
       );
 
-      // setSelectedRoomId(newRoomId);
-      // Зробити візуалізацію отримання повідомлення, що запрошення надіслано
       setOpenNewContantModal(false);
       setSearchedContacts([]);
     } catch (err) {
@@ -136,7 +134,7 @@ function NewDM() {
         <Tooltip>
           <TooltipTrigger>
             <FaPlus
-              className="text-neutral-400 font-light text-opacity-90 text-start hover:text-neutral-100 cursor-pointer transition-all duration-300"
+              className="text-neutral-400 font-light text-opacity-90 text-start hover:text-[#c084fc] cursor-pointer transition-all duration-300"
               onClick={() => setOpenNewContantModal(true)}
             />
           </TooltipTrigger>
@@ -145,30 +143,37 @@ function NewDM() {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
       <Dialog open={openNewContantModal} onOpenChange={setOpenNewContantModal}>
-        <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col">
+        <DialogContent className="bg-[#181920] border-none text-white w-[400px] h-[400px] flex flex-col rounded-lg shadow-[0_4px_15px_#9333ea66]">
           <DialogHeader>
-            <DialogTitle>Please select a contact</DialogTitle>
-            <DialogDescription></DialogDescription>
+            <DialogTitle className="text-[#c084fc]">
+              Please select a contact
+            </DialogTitle>
+            <DialogDescription className="text-sm text-neutral-400">
+              Search and select a new contact to start chatting.
+            </DialogDescription>
           </DialogHeader>
+
           <div>
             <Input
               placeholder="Search Contacts"
-              className="rounded-lg p-6 bg-[#2c2e3b] border-none"
+              className="rounded-lg p-6 bg-[#2c2e3b] border-none focus:outline-none focus:ring-2 focus:ring-[#6b21a8] text-[#e0d4ff]"
               onChange={(e) => searchContact(e.target.value)}
             />
           </div>
+
           {searchedContacts.length > 0 && (
             <ScrollArea className="h-[250px]">
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-5 mt-4">
                 {searchedContacts.map((contact) => (
                   <div
                     key={contact.userId}
-                    className="flex items-center gap-3 cursor-pointer"
+                    className="flex items-center gap-3 cursor-pointer hover:bg-[#6b21a866] transition-all p-3 rounded-lg"
                     onClick={() => selectNewContact(contact)}
                   >
                     <div className="w-12 h-12 relative">
-                      <Avatar className="h-12 w-12 rounded-full overflow-hidden">
+                      <Avatar className="h-12 w-12 rounded-full overflow-hidden shadow-[0_0_10px_#9333ea66]">
                         {contact.avatarUrl ? (
                           <AvatarImage
                             src={contact.avatarUrl}
@@ -177,7 +182,7 @@ function NewDM() {
                           />
                         ) : (
                           <div
-                            className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full ${getColor()}`}
+                            className={`h-12 w-12 text-lg border-[1px] flex items-center justify-center rounded-full bg-[#121219] text-[#d8b4fe]`}
                           >
                             {contact.displayName
                               ? contact.displayName.charAt(0).toUpperCase()
@@ -187,18 +192,21 @@ function NewDM() {
                       </Avatar>
                     </div>
                     <div className="flex flex-col">
-                      <span>
+                      <span className="text-[#e0d4ff] text-sm">
                         {contact.displayName
                           ? contact.displayName
                           : contact.userId?.split(":")[0].slice(1)}
                       </span>
-                      <span className="text-xs">{contact.userId}</span>
+                      <span className="text-xs text-neutral-400">
+                        {contact.userId}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
           )}
+
           {searchedContacts.length <= 0 && (
             <div className="flex-1 md:flex mt-5 md:mt-0 flex-col justify-center items-center duration-1000 transition-all">
               <Lottie
@@ -209,8 +217,8 @@ function NewDM() {
               />
               <div className="text-opacity-80 text-white flex flex-col gap-5 items-center mt-5 lg:text-2xl text-xl transition-all duration-300 text-center">
                 <h3 className="poppins-medium">
-                  Hi<span className="text-purple-500">!</span> Search new{" "}
-                  <span className="text-purple-500"> Contacts. </span>
+                  Hi<span className="text-[#c084fc]">!</span> Search new{" "}
+                  <span className="text-[#9333ea]"> Contacts. </span>
                 </h3>
               </div>
             </div>
