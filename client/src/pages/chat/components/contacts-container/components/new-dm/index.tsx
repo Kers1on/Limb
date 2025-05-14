@@ -20,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getCustomHttpForMxc } from "@/lib/clientDataService";
 import { Preset, AccountDataEvents } from "matrix-js-sdk";
+import { toast } from "sonner";
 
 function NewDM() {
   const { client, setSelectedRoomId } = useMatrix();
@@ -104,6 +105,15 @@ function NewDM() {
         invite: [contact.userId],
         preset: Preset.PrivateChat,
         is_direct: true,
+        initial_state: [
+          {
+            type: "m.room.encryption",
+            state_key: "",
+            content: {
+              algorithm: "m.megolm.v1.aes-sha2",
+            },
+          },
+        ],
       });
 
       const newRoomId = res.room_id;
@@ -121,6 +131,7 @@ function NewDM() {
 
       setOpenNewContantModal(false);
       setSearchedContacts([]);
+      toast.success("The invite to the user is sent");
     } catch (err) {
       console.error("Failed to create DM room:", err);
     }

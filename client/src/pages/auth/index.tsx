@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useMatrix } from "@/lib/matrixContext";
 import { createClient, ClientEvent } from "matrix-js-sdk";
 import { login, register } from "@/lib/matrixAuthService";
+import { initAsync } from "@matrix-org/matrix-sdk-crypto-wasm";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -50,6 +51,8 @@ const Auth = () => {
         const clientData = await login(username, password);
 
         if (clientData) {
+          await initAsync();
+
           const client = createClient({
             baseUrl: clientData.baseUrl,
             accessToken: clientData.accessToken,
@@ -57,6 +60,8 @@ const Auth = () => {
             deviceId: clientData.deviceId,
             useAuthorizationHeader: true,
           });
+
+          await client.initRustCrypto();
 
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
@@ -83,6 +88,8 @@ const Auth = () => {
         const clientData = await register(username, password, confirmPassword);
 
         if (clientData) {
+          await initAsync();
+
           const client = createClient({
             baseUrl: clientData.baseUrl,
             accessToken: clientData.accessToken,
@@ -90,6 +97,8 @@ const Auth = () => {
             deviceId: clientData.deviceId,
             useAuthorizationHeader: true,
           });
+
+          await client.initRustCrypto();
 
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {

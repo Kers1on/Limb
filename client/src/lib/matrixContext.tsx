@@ -12,6 +12,7 @@ import {
   getSelectedRoomId,
   clearSelectedRoomId,
 } from "./storageSession";
+import { initAsync } from "@matrix-org/matrix-sdk-crypto-wasm";
 
 interface MatrixContextType {
   client: MatrixClient | null;
@@ -62,6 +63,8 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
         const { accessToken, userId, baseUrl, deviceId } = getSession();
 
         if (accessToken && userId && baseUrl && deviceId) {
+          await initAsync();
+
           const restoredClient = createClient({
             baseUrl,
             accessToken,
@@ -70,7 +73,7 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
             useAuthorizationHeader: true,
           });
 
-          // 👇 Auto-join при інвайті TEMP
+          // 👇 Auto-join при інвайті
           restoredClient.on(RoomMemberEvent.Membership, (_, member) => {
             if (
               member.membership === "invite" &&
@@ -82,7 +85,7 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           });
 
-          // 👇 Додаємо кімнату до m.direct при приєднанні TEMP
+          // 👇 Додаємо кімнату до m.direct при приєднанні
           restoredClient.on(RoomMemberEvent.Membership, async (_, member) => {
             if (
               member.membership === "join" &&
@@ -133,6 +136,8 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
               }
             }
           });
+
+          await restoredClient.initRustCrypto();
 
           restoredClient.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {

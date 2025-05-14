@@ -2,6 +2,7 @@ import { useMatrix } from "@/lib/matrixContext";
 import {
   MatrixClient,
   MatrixEvent,
+  MatrixEventEvent,
   MsgType,
   Room,
   RoomEvent,
@@ -151,25 +152,21 @@ function MessageContainer() {
   useEffect(() => {
     if (!client || !selectedRoomId) return;
 
-    const handleNewEvent = (
-      event: MatrixEvent,
-      _: any,
-      toStartOfTimeline: boolean | undefined
-    ) => {
-      if (toStartOfTimeline) return;
-      if (event.getType() === "m.room.message") {
+    const room = client.getRoom(selectedRoomId);
+    if (!room) return;
+
+    const handleNewEvent = (event: MatrixEvent) => {
+      const processEvent = () => {
         const content = event.getContent();
         if (
           content.msgtype === MsgType.Text ||
           content.msgtype === MsgType.File ||
           content.msgtype === MsgType.Image
         ) {
-          const room = client.getRoom(selectedRoomId);
           const senderId = event.getSender();
-
           if (!senderId) return;
 
-          const member = room?.getMember(senderId);
+          const member = room.getMember(senderId);
           const displayName = member?.name;
           const avatarUrl = getCustomHttpForMxc(
             client.baseUrl,
@@ -190,13 +187,28 @@ function MessageContainer() {
 
           setMessages((prev) => [...prev, newMessage]);
         }
+      };
+
+      if (event.isEncrypted()) {
+        event.once(MatrixEventEvent.Decrypted, processEvent);
+      } else {
+        processEvent();
       }
     };
 
-    client.on(RoomEvent.Timeline, handleNewEvent);
+    const timelineHandler = (
+      event: MatrixEvent,
+      room: Room | undefined,
+      toStartOfTimeline: boolean | undefined
+    ) => {
+      if (toStartOfTimeline || !room || room.roomId !== selectedRoomId) return;
+      handleNewEvent(event);
+    };
+
+    client.on(RoomEvent.Timeline, timelineHandler);
 
     return () => {
-      client.off(RoomEvent.Timeline, handleNewEvent);
+      client.off(RoomEvent.Timeline, timelineHandler);
     };
   }, [client, selectedRoomId]);
 
