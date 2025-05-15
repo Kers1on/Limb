@@ -46,17 +46,20 @@ function NewDM() {
         });
 
         if (response) {
-          const users = response.results.map((user: any) => ({
-            userId: user.user_id,
-            displayName: user.display_name || user.user_id,
-            avatarUrl: user.avatar_url
-              ? getCustomHttpForMxc(
-                  client.baseUrl,
-                  user.avatar_url,
-                  client.getAccessToken() || ""
-                )
-              : null,
-          }));
+          const users = response.results
+            .filter((user: any) => user.user_id !== client.getUserId())
+            .map((user: any) => ({
+              userId: user.user_id,
+              displayName: user.display_name || user.user_id,
+              avatarUrl: user.avatar_url
+                ? getCustomHttpForMxc(
+                    client.baseUrl,
+                    user.avatar_url,
+                    client.getAccessToken() || ""
+                  )
+                : null,
+            }));
+
           setSearchedContacts(users);
         } else {
           setSearchedContacts([]);
