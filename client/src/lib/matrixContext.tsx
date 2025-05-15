@@ -12,7 +12,6 @@ import {
   getSelectedRoomId,
   clearSelectedRoomId,
 } from "./storageSession";
-import { initAsync } from "@matrix-org/matrix-sdk-crypto-wasm";
 
 interface MatrixContextType {
   client: MatrixClient | null;
@@ -63,8 +62,6 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
         const { accessToken, userId, baseUrl, deviceId } = getSession();
 
         if (accessToken && userId && baseUrl && deviceId) {
-          await initAsync();
-
           const restoredClient = createClient({
             baseUrl,
             accessToken,
@@ -137,16 +134,14 @@ export const MatrixProvider: React.FC<{ children: React.ReactNode }> = ({
             }
           });
 
-          await restoredClient.initRustCrypto();
-
           restoredClient.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
               setIsClientReady(true);
+              setClient(restoredClient);
             }
           });
 
           restoredClient.startClient();
-          setClient(restoredClient);
         }
       } catch (error) {
         console.error("Failed to restore Matrix client:", error);

@@ -98,13 +98,6 @@ function CreateChannel() {
         is_direct: false,
         initial_state: [
           {
-            type: "m.room.encryption",
-            state_key: "",
-            content: {
-              algorithm: "m.megolm.v1.aes-sha2",
-            },
-          },
-          {
             type: "m.room.topic",
             state_key: "",
             content: {

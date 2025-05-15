@@ -94,10 +94,10 @@ npm run dev
 
 And register first user.
 
-### In matrix/createIndexationRoom.js after registration
-
-```tsx
-const accessToken = "example"; // Put here your access_token from homeserver.db "access_tokens" table
+### In matrix/.env after registration
+Put here your access_token from homeserver.db "access_tokens" table
+```env
+ACCESS_TOKEN = "example"
 ```
 
 ### Create First Public Room for indexation
@@ -106,12 +106,10 @@ const accessToken = "example"; // Put here your access_token from homeserver.db 
 node createIndexationRoom.js
 ```
 
-### After creating room put roomId in client/src/pages/auth/index.tsx in handleRegistration()
+### After creating room put roomId in client/.env
 
-```tsx
-client.startClient();
-client.joinRoom("!qwerty:localhost"); // <-- Put here roomId for indexation
-setClient(client);
+```env
+VITE_PUBLIC_ROOM="!example:domain"
 ```
 
 Now it's ready to use. Have fun!

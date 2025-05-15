@@ -108,15 +108,6 @@ function NewDM() {
         invite: [contact.userId],
         preset: Preset.PrivateChat,
         is_direct: true,
-        initial_state: [
-          {
-            type: "m.room.encryption",
-            state_key: "",
-            content: {
-              algorithm: "m.megolm.v1.aes-sha2",
-            },
-          },
-        ],
       });
 
       const newRoomId = res.room_id;

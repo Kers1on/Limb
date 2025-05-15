@@ -1,5 +1,5 @@
 async function createIndexationRoom() {
-  const accessToken = "syt_a2Vyc2lvbg_sSNvsMULJhZAWeEspIpr_3QfTQu";
+  const accessToken = import.meta.env.ACCESS_TOKEN;
 
   try {
     const response = await fetch(`http://localhost:8008/_matrix/client/v3/createRoom?access_token=${accessToken}`, {

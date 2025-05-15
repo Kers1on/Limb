@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { useMatrix } from "@/lib/matrixContext";
 import { createClient, ClientEvent } from "matrix-js-sdk";
 import { login, register } from "@/lib/matrixAuthService";
-import { initAsync } from "@matrix-org/matrix-sdk-crypto-wasm";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -51,8 +50,6 @@ const Auth = () => {
         const clientData = await login(username, password);
 
         if (clientData) {
-          await initAsync();
-
           const client = createClient({
             baseUrl: clientData.baseUrl,
             accessToken: clientData.accessToken,
@@ -61,16 +58,14 @@ const Auth = () => {
             useAuthorizationHeader: true,
           });
 
-          await client.initRustCrypto();
-
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
               setIsClientReady(true);
+              setClient(client);
             }
           });
 
           client.startClient();
-          setClient(client);
           navigate("/profile");
         } else {
           throw new Error("Client is not initialized");
@@ -88,8 +83,6 @@ const Auth = () => {
         const clientData = await register(username, password, confirmPassword);
 
         if (clientData) {
-          await initAsync();
-
           const client = createClient({
             baseUrl: clientData.baseUrl,
             accessToken: clientData.accessToken,
@@ -98,17 +91,16 @@ const Auth = () => {
             useAuthorizationHeader: true,
           });
 
-          await client.initRustCrypto();
-
           client.once(ClientEvent.Sync, (state) => {
             if (state === "PREPARED") {
               setIsClientReady(true);
+              const publicRoomId = import.meta.env.VITE_PUBLIC_ROOM;
+              client.joinRoom(publicRoomId);
+              setClient(client);
             }
           });
 
           client.startClient();
-          client.joinRoom("!fMgVAkcyBNHXIYcDZI:localhost"); // Join a public room for indexation
-          setClient(client);
           navigate("/profile");
         }
       } catch (error) {
